@@ -16,7 +16,7 @@ def main():
 		rgb_frame = frame[:, :, ::-1]
 
 		# Find all the faces in the current frame of video
-		face_locations = face_recognition.face_landmarks(rgb_frame)
+		face_locations = face_recognition.face_locations(rgb_frame)
 
 		# Display the results
 		for top, right, bottom, left in face_locations:
