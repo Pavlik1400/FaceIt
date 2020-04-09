@@ -13,7 +13,7 @@ class UsersData:
         self.__right_level = right_level
         self.__passwd = passwd
 
-    def get_photo(self):
+    def get_photo   (self):
         """
         Returns encoded biometrical info of someone`s face
         """
