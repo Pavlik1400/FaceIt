@@ -13,8 +13,6 @@ def main():
     us = User(0)
     us.some_func_that_works_if_logged()
     us.exit()
-    us.some_func_that_works_if_logged()
-
 
 if __name__ == '__main__':
     main()

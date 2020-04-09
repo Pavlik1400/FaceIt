@@ -72,6 +72,8 @@ class Database:
         with open('auth_data.json', 'w', encoding='utf-8') as file:
             json.dump(user_data, file, ensure_ascii=False, indent=4)
 
+        self.initialise_known_faces()
+
         print("Successfully created new user! Please, log in now!\n")
 
 
@@ -155,7 +157,7 @@ class User:
         elif not self.db.users:
             print("not logged, please, create the first user")
             self.db.new_user(self.webcam)
-            self.db = Database()
+            self.some_func_that_works_if_logged()
         else:
             print("not logged in")
             self.login()
