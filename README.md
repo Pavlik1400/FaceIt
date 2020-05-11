@@ -36,22 +36,22 @@ Dependencies for this project:
 - Eigen3 version 3.3.7
 
 We partly changed and implemented this project as recognition basis of our app.  See classes:
-`AddUserActivity.java` - Activity with UI for adding user biometrical info (face photos) 
-`CameraBridgeViewBase.java` - interaction with Camera and OpenCV library
-`JavaCameraView.java` - implementation of the Bridge View between OpenCV and Java Camera
-`NativeMethods.java` - implementation of recognition algoritm (uses [FaceRecognitionLib](https://github.com/Lauszus/FaceRecognitionLib), written on C++)
-`TinyDB.java` - database for image vectors
-`UserLockRecognitionActivity.java` - Activity with UI for recognising user when some app is locked
+- `AddUserActivity.java` - Activity with UI for adding user biometrical info (face photos) 
+- `CameraBridgeViewBase.java` - interaction with Camera and OpenCV library
+- `JavaCameraView.java` - implementation of the Bridge View between OpenCV and Java Camera
+- `NativeMethods.java` - implementation of recognition algoritm (uses [FaceRecognitionLib](https://github.com/Lauszus/FaceRecognitionLib), written on C++)
+- `TinyDB.java` - database for image vectors
+- `UserLockRecognitionActivity.java` - Activity with UI for recognising user when some app is locked
 
 Another part of our project is app locker and installed app finder.
-`BlockServise.java` - servise for blocking chosen apps which user tries to open
-`DataBase.java` - database for locked apps
-`DetailsActivity.java` -  Activity with UI for listing all installed apps and choosing them for locking
-`MyNotification.java` - helping class for creating Notification, that forses Android system to set high priority for our app
-`NewItemAdapter.java` - class for DetailsActivity that used for choosing blocked apps
+- `BlockServise.java` - servise for blocking chosen apps which user tries to open
+- `DataBase.java` - database for locked apps
+- `DetailsActivity.java` -  Activity with UI for listing all installed apps and choosing them for locking
+- `MyNotification.java` - helping class for creating Notification, that forses Android system to set high priority for our app
+- `NewItemAdapter.java` - class for DetailsActivity that used for choosing blocked apps
 
 Finally, the main UI class:
-`FaceRecognitionActivity.java` - main UI Activity, which works as menu and which starts `AddUserActivity`, `DetailsActivity` and `BlockServise`. Here user can navidate throught all features of our app
+- `FaceRecognitionActivity.java` - main UI Activity, which works as menu and which starts `AddUserActivity`, `DetailsActivity` and `BlockServise`. Here user can navidate throught all features of our app
 
 ## Project status
 Project is on the way to the open beta version. Just finishing some technical features. Version: 0.6.3-alpha
@@ -59,6 +59,7 @@ Project is on the way to the open beta version. Just finishing some technical fe
 ## How to use?
 1) **Install Android Studio, SDK and NDK**<br/>
 For all platforms (Windows, Linux, MacOS):
+
 - Go to [official web site](https://developer.android.com/studio) and install version for your platform
 - Go to Android Studio -> SDK Manager -> SDK Platforms and install Android 10.0 (API level 29)
 - Go to Android Studio -> SDK Manager -> SDK Tools and install Android SDK Build-tools version 29.0.3, NDK version 21.0.6113669, CMake version 3.10.2.4988404
@@ -70,22 +71,30 @@ For all platforms (Windows, Linux, MacOS):
 
 For Windows:
     - go to Conrtol Panel -> System -> Additional system settings -> Environmental variables
+
     - Set variable `OPENCV_ANDROID_SDK` to directory with unzipped OpenCV SDK
+    
     - Set variable `EIGEN3_DIR` to directory with unzipped Eigen3
 
 For Linux:
 `
 nano ~/.bash_profile
+
 export OPENCV_ANDROID_SDK=/path/to/OpenCV-android-sdk
+
 export EIGEN3_DIR=/path/to/eigen3
+
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
 
 For MacOS:
 `
 nano /etc/launchd.conf
+
 setenv OPENCV_ANDROID_SDK /path/to/OpenCV-android-sdk
+
 setenv EIGEN3_DIR /path/to/eigen3
+
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
 
