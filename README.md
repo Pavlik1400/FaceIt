@@ -81,12 +81,15 @@ For Linux:
 `
 nano ~/.bash_profile
 `
+
 `
 export OPENCV_ANDROID_SDK=/path/to/OpenCV-android-sdk
 `
+
 `
 export EIGEN3_DIR=/path/to/eigen3
 `
+
 `
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
@@ -96,12 +99,15 @@ For MacOS:
 `
 nano /etc/launchd.conf
 `
+
 `
 setenv OPENCV_ANDROID_SDK /path/to/OpenCV-android-sdk
 `
+
 `
 setenv EIGEN3_DIR /path/to/eigen3
 `
+
 `
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
@@ -119,3 +125,18 @@ echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 - Go to Add user and take a few photos of yourself. It will ask you permission to use camera. Give it. **Important!** Make photos from different edges. Dot`d be scared to make too much photos. Program will authomatically return to to main screen when where are enough photos!
 - Press Start service. Now app is running!
 - To stop app, press Stop service
+
+## Our furure plans
+
+### Changes we plan to add before beta version
+
+- Fix locking app (now it starts face recognition many times after entering locked app)
+- Add autorun on the boot of phone
+
+### Changes we plan to add before release version
+
+- Restruct and update database
+- Fix listing installed apps (not all apps are shown)
+- Add seach by keyword in list of installed apps
+- Change styles and appearance of program
+- Add ability to use password instead of face recognition
