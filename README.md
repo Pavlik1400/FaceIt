@@ -77,24 +77,26 @@ For Windows:
     - Set variable `EIGEN3_DIR` to directory with unzipped Eigen3
 
 For Linux:
+
 `
 nano ~/.bash_profile
-
+`
 export OPENCV_ANDROID_SDK=/path/to/OpenCV-android-sdk
-
+`
 export EIGEN3_DIR=/path/to/eigen3
-
+`
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
 
 For MacOS:
+
 `
 nano /etc/launchd.conf
-
+`
 setenv OPENCV_ANDROID_SDK /path/to/OpenCV-android-sdk
-
+`
 setenv EIGEN3_DIR /path/to/eigen3
-
+`
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
 
@@ -106,7 +108,7 @@ echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 
 4) **Give permissions on Android and usage**</br>
 - After installation firstly go to Settings -> All programs -> FaceIt -> Permissions/Other permissions -> Start in background. Give that permission
-- Open app, it will automatic redirect to Data access permission. Give it too
+- Open app, it will authomatically redirect to Data access permission. Give it too
 - Go to app, enter Installed Apps and tick all apps yuo want to lock
 - Go to Add user and take a few photos of yourself. It will ask you permission to use camera. Give it. **Important!** Make photos from different edges. Dot`d be scared to make too much photos. Program will authomatically return to to main screen when where are enough photos!
 - Press Start service. Now app is running!
