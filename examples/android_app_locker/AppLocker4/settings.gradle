@@ -1,0 +1,2 @@
+rootProject.name='AppLocker2'
+include ':app'
