@@ -81,9 +81,12 @@ For Linux:
 `
 nano ~/.bash_profile
 `
+`
 export OPENCV_ANDROID_SDK=/path/to/OpenCV-android-sdk
 `
+`
 export EIGEN3_DIR=/path/to/eigen3
+`
 `
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
@@ -93,9 +96,12 @@ For MacOS:
 `
 nano /etc/launchd.conf
 `
+`
 setenv OPENCV_ANDROID_SDK /path/to/OpenCV-android-sdk
 `
+`
 setenv EIGEN3_DIR /path/to/eigen3
+`
 `
 echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 `
@@ -103,7 +109,7 @@ echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 3) **Clone and open this porject in Android Studio**</br>
 - `git clone https://github.com/Pavlik1400/FaceIt`
 - Android Studio -> Open -> FaceIt/modules/main
-- Now wait for project to build. There may occur some errors, like "Install Build-tools" or "Install Andrion SDK" if you haven`t done this yet. Just agree to install them nd system will do the rest.
+- Now wait for project to build. There may occur some errors, like "Install Build-tools" or "Install Andrion SDK" if you haven`t done this yet. Just agree to install them and system will do the rest.
 - Run project on virtual device or your real phone
 
 4) **Give permissions on Android and usage**</br>
