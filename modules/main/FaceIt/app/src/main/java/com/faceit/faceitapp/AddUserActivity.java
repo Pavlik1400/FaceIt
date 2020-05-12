@@ -23,9 +23,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -57,15 +55,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.faceit.faceitapp.R;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -89,8 +87,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private CameraBridgeViewBase mOpenCvCameraView;
     private Mat mRgba, mGray;
     private Toast mToast;
-    private boolean useEigenfaces;
-    private SeekBarArrows mThresholdFace, mThresholdDistance, mMaximumImages;
+    private boolean useEigenfaces = true;
     private float faceThreshold, distanceThreshold;
     private int maximumImages;
     private SharedPreferences prefs;
@@ -135,41 +132,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         Log.i(TAG, "Images height: " + imagesMatrix.height() + " Width: " + imagesMatrix.width() + " total: " + imagesMatrix.total());
 
         // Train the face recognition algorithms in an asynchronous task, so we do not skip any frames
-        if (useEigenfaces) {
-            Log.i(TAG, "Training Eigenfaces");
-            //showToast("Training " + getResources().getString(R.string.eigenfaces), Toast.LENGTH_SHORT);
+        Log.i(TAG, "Training Eigenfaces");
 
-            mTrainFacesTask = new NativeMethods.TrainFacesTask(imagesMatrix, trainFacesTaskCallback);
-        } else {
-            Log.i(TAG, "Training Fisherfaces");
-            //showToast("Training " + getResources().getString(R.string.fisherfaces), Toast.LENGTH_SHORT);
-
-            Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
-            uniqueLabels = uniqueLabelsSet.toArray(new String[uniqueLabelsSet.size()]); // Convert to String array, so we can read the values from the indices
-
-            int[] classesNumbers = new int[uniqueLabels.length];
-            for (int i = 0; i < classesNumbers.length; i++)
-                classesNumbers[i] = i + 1; // Create incrementing list for each unique label starting at 1
-
-            int[] classes = new int[imagesLabels.size()];
-            for (int i = 0; i < imagesLabels.size(); i++) {
-                String label = imagesLabels.get(i);
-                for (int j = 0; j < uniqueLabels.length; j++) {
-                    if (label.equals(uniqueLabels[j])) {
-                        classes[i] = classesNumbers[j]; // Insert corresponding number
-                        break;
-                    }
-                }
-            }
-
-            /*for (int i = 0; i < imagesLabels.size(); i++)
-                Log.i(TAG, "Classes: " + imagesLabels.get(i) + " = " + classes[i]);*/
-
-            Mat vectorClasses = new Mat(classes.length, 1, CvType.CV_32S); // CV_32S == int
-            vectorClasses.put(0, 0, classes); // Copy int array into a vector
-
-            mTrainFacesTask = new NativeMethods.TrainFacesTask(imagesMatrix, vectorClasses, trainFacesTaskCallback);
-        }
+        mTrainFacesTask = new NativeMethods.TrainFacesTask(imagesMatrix, trainFacesTaskCallback);
         mTrainFacesTask.execute();
 
         return true;
@@ -296,15 +261,12 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        useEigenfaces = true;
-
-        // Set radio button based on value stored in shared preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
-        faceThreshold = (float) 0.21; // Get initial value
-        distanceThreshold = (float) 0.21; // Get initial value
-        maximumImages = 25; // Get initial value
+        faceThreshold = (float) 0.2; // Get initial value
+        distanceThreshold = (float) 0.15; // Get initial value
+        maximumImages = 50; // Get initial value
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
             NativeMethods.MeasureDistTask mMeasureDistTask;
@@ -338,11 +300,11 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
                 images.add(image); // Add current image to the array
 
-                if (images.size() > maximumImages) {
+                /*if (images.size() > maximumImages) {
                     images.remove(0); // Remove first image
                     imagesLabels.remove(0); // Remove first label
                     Log.i(TAG, "The number of images is limited to: " + images.size());
-                }
+                }*/
 
                 // Calculate normalized Euclidean distance
                 mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
@@ -392,19 +354,26 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 if (imagesLabels.size() > minIndex) { // Just to be sure
                     Log.i(TAG, "dist[" + minIndex + "]: " + minDist + ", face dist: " + faceDist + ", label: " + imagesLabels.get(minIndex));
 
-                    String minDistString = String.format(Locale.US, "%.4f", minDist);
-                    String faceDistString = String.format(Locale.US, "%.4f", faceDist);
-
                     if (faceDist < faceThreshold && minDist < distanceThreshold) { // 1. Near face space and near a face class
                         showToast("User added: " + imagesLabels.get(minIndex), Toast.LENGTH_LONG);
-                        startActivity(new Intent(AddUserActivity.this, FaceRecognitionAppActivity.class));
+                        images.remove(images.size() - 1);
+                        trainFaces();
+                        tinydb.putListMat("images", images);
+                        tinydb.putListString("imagesLabels", imagesLabels);
+                        finish();
                     }
-                    else if (faceDist < faceThreshold) // 2. Near face space but not near a known face class
+                    else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class
+                        showLabelsDialog();
                         showToast("Unknown face", Toast.LENGTH_LONG);
-                    else if (minDist < distanceThreshold) // 3. Distant from face space and near a face class
+                    }
+                    else if (minDist < distanceThreshold) { // 3. Distant from face space and near a face class
                         showToast("False recognition", Toast.LENGTH_LONG);
-                    else // 4. Distant from face space and not near a known face class.
+                    }
+                    else { // 4. Distant from face space and not near a known face class.
                         showToast("Image is not a face", Toast.LENGTH_LONG);
+                    }
+                } else {
+                    showToast("everything is wrong", Toast.LENGTH_LONG);
                 }
             } else {
                 Log.w(TAG, "Array is null");
@@ -445,14 +414,6 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     @Override
     public void onStop() {
         super.onStop();
-        // Store threshold values
-        Editor editor = prefs.edit();
-        editor.putFloat("faceThreshold", faceThreshold);
-        editor.putFloat("distanceThreshold", distanceThreshold);
-        editor.putInt("maximumImages", maximumImages);
-        editor.putBoolean("useEigenfaces", useEigenfaces);
-        editor.putInt("mCameraIndex", mOpenCvCameraView.mCameraIndex);
-        editor.apply();
 
         // Store ArrayLists containing the images and labels
         if (images != null && imagesLabels != null) {
@@ -467,7 +428,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
 
         // Request permission if needed
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED/* || ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED*/)
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA/*, Manifest.permission.WRITE_EXTERNAL_STORAGE*/}, PERMISSIONS_REQUEST_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSIONS_REQUEST_CODE);
         else
             loadOpenCV();
     }

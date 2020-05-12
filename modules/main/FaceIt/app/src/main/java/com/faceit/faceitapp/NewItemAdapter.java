@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,19 +15,23 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.faceit.faceitapp.DataBase2;
+import com.faceit.faceitapp.R;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemViewHolder>{
 
     LayoutInflater mInflater;
-    private List<String> appsNames;
-    private List<String> appsPackageNames;
-    private List<String> appsLocked;
-    private List<Drawable> appsIcons;
+    private ArrayList<String> appsNames;
+    private ArrayList<String> appsPackageNames;
+    private ArrayList<String> appsLocked;
+    private ArrayList<Drawable> appsIcons;
     private Context context;
 
-    public NewItemAdapter(List<String> apps, List<String> packages,
-                          List<String> lockeds, List<Drawable> icons){
+    public NewItemAdapter(ArrayList<String> apps, ArrayList<String> packages,
+                          ArrayList<String> lockeds, ArrayList<Drawable> icons){
         appsNames = apps;
         appsPackageNames = packages;
         appsLocked = lockeds;
@@ -41,20 +46,20 @@ public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemView
 
         View myView = mInflater.inflate(R.layout.details_layout, parent, false);
 
-        ItemViewHolder viewHolder = new ItemViewHolder(myView);
-
-        return viewHolder;
+        return new ItemViewHolder(myView);
 
     }
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+        boolean locked = false;
         String name = appsNames.get(position);
         String package_name = appsPackageNames.get(position);
-        String locked = appsLocked.get(position);
+        if (!appsLocked.isEmpty())
+            locked = appsLocked.contains(package_name);
         Drawable icon = appsIcons.get(position);
 
-        holder.bind(name, locked, package_name, icon);
+        holder.bind(name, package_name, locked, icon);
     }
 
     @Override
@@ -76,13 +81,10 @@ public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemView
             lockedCheckBox = itemView.findViewById(R.id.lockedCheckBox);
         }
 
-        void bind(String appName, String locked, final String packageName, Drawable icon){
+        void bind(String appName, final String packageName, boolean locked, Drawable icon){
             appNameTextView.setText(appName);
             appIconImageView.setImageDrawable(icon);
-            if (locked.equals("true"))
-                lockedCheckBox.setChecked(true);
-            else
-                lockedCheckBox.setChecked(false);
+            lockedCheckBox.setChecked(locked);
 
             lockedCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -96,19 +98,12 @@ public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemView
         }
     }
     public void setLocked(boolean locked, String package_name){
-        DataBase dbHelper = new DataBase(context);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        ContentValues new_val = new ContentValues();
+        DataBase2 db = new DataBase2(context);
 
         if (locked)
-            new_val.put(DataBase.FeedEntry.COLUMN_NAME_LOCKED, "true");
+            db.setLocked(db.getChosenProfile(), package_name);
         else
-            new_val.put(DataBase.FeedEntry.COLUMN_NAME_LOCKED, "false");
-
-        db.update(DataBase.FeedEntry.TABLE_NAME, new_val,
-                DataBase.FeedEntry.COLUMN_NAME_PACKAGE_NAME + " = ?",
-                new String[] {package_name});
+            db.unsetLocked(db.getChosenProfile(), package_name);
 
         db.close();
     }

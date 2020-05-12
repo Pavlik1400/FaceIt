@@ -39,6 +39,13 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.faceit.faceitapp.AddUserActivity;
+import com.faceit.faceitapp.AppInfo;
+import com.faceit.faceitapp.BlockService;
+import com.faceit.faceitapp.DataBase2;
+import com.faceit.faceitapp.DetailsActivity;
+import com.faceit.faceitapp.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +57,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
             PackageManager.GET_UNINSTALLED_PACKAGES;
 
     // Gets ArrayList of installed applications
-    private ArrayList<AppInfo> getInstalledApps() {
+    public ArrayList<AppInfo> getInstalledApps() {
 
         ArrayList<AppInfo> res = new ArrayList<>();
         // Get list of aps with given flags (filters)
@@ -121,41 +128,20 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
 
         // Get list of apps and initialize writable database
         ArrayList<AppInfo> apps = getInstalledApps();
-        DataBase dbHelper = new DataBase(getApplicationContext());
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        DataBase2 db = new DataBase2(getApplicationContext());
+        if (!db.hasProfile())
+            db.createNewProfile("Default");
 
-        // iterate through found applications
+
+        // iterate through found applications and update db if needed
         for (AppInfo app: apps){
             String app_name = app.app_name;
             String package_name = app.package_name;
 
-            // Selection parametres (search with package name)
-            String selection = DataBase.FeedEntry.COLUMN_NAME_PACKAGE_NAME + " = ?";
-            String[] selectionArgs = {package_name};
-
-            // Cursor on apps with package_name package name
-            Cursor searchCursor = db.query(
-                    DataBase.FeedEntry.TABLE_NAME,
-                    null,
-                    selection,
-                    selectionArgs,
-                    null, null, null);
-
-            // If there is no app with this package name than add new
-            if (!searchCursor.moveToNext()){
-                ContentValues values = new ContentValues();
-                values.put(DataBase.FeedEntry.COLUMN_NAME_APP_NAME, app_name);
-                values.put(DataBase.FeedEntry.COLUMN_NAME_PACKAGE_NAME, package_name);
-                values.put(DataBase.FeedEntry.COLUMN_NAME_LOCKED, "false");
-
-                db.insert(DataBase.FeedEntry.TABLE_NAME, null, values);
-
-                // Log.d("WRITING", "put app name: " + app_name);
+            if (!db.containsApp(package_name)){
+                db.addApp(app_name, package_name);
             }
-            else{
-                String msg = searchCursor.getString(searchCursor.getColumnIndex(DataBase.FeedEntry.COLUMN_NAME_APP_NAME));
-                // Log.d("Found_app", msg);
-            }
+
         }
 
         ShowHideProgressBar(0);

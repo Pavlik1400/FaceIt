@@ -30,6 +30,9 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.faceit.faceitapp.FaceRecognitionAppActivity;
+import com.faceit.faceitapp.R;
+
 import java.util.Locale;
 
 public class SeekBarArrows extends LinearLayout implements SeekBar.OnSeekBarChangeListener {

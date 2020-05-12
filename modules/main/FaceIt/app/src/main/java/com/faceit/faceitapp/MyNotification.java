@@ -8,7 +8,7 @@ import android.os.Build;
 
 public class MyNotification extends Application {
     //*Class for creating notification */
-    public static final String CHANNEL_ID = "blockServiceChannel";
+    public static final String CHANNEL_ID = "12121212";
 
     @Override
     public void onCreate(){
@@ -20,11 +20,14 @@ public class MyNotification extends Application {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
                     "Blocking apps",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_HIGH
             );
-            serviceChannel.setLightColor(Color.BLUE);
+            serviceChannel.setDescription("description");
+            //serviceChannel.setLightColor(Color.BLUE);
             NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(serviceChannel);
+            if (manager != null){
+                manager.createNotificationChannel(serviceChannel);
+            }
         }
     }
 }

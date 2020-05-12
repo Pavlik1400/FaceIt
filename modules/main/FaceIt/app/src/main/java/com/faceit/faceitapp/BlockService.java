@@ -1,6 +1,5 @@
 package com.faceit.faceitapp;
 
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -13,9 +12,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+
+import com.faceit.faceitapp.DataBase2;
+import com.faceit.faceitapp.R;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +32,10 @@ import static com.faceit.faceitapp.MyNotification.CHANNEL_ID;
 
 public class BlockService extends Service {
     private Timer timer; //timer for scheduling service work
+    private boolean recognition_running = false;
+    private String allowed_app = "None";
+    private double time_from_last_open=-1;
+
 
     @Override
     public void onCreate() {
@@ -46,8 +53,8 @@ public class BlockService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Locker is running")
-
+                .setContentTitle("Lock process is running")
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1, notification); //start notification
@@ -98,43 +105,31 @@ public class BlockService extends Service {
 
         timer = new Timer();
         // Get database
-        DataBase dbHelper = new DataBase(BlockService.this);
-        final SQLiteDatabase db = dbHelper.getReadableDatabase();
+        final DataBase2 db = new DataBase2(getApplicationContext());
 
         TimerTask timerTask = new TimerTask() {
             public void run() {
-                boolean flag = true;
                 String current_app_package = getActiveApps();
-
-                // create parameters fot finding app in DataBase by package name
-                // We need only information about locking
-                String[] projection = {DataBase.FeedEntry._ID, DataBase.FeedEntry.COLUMN_NAME_LOCKED};
-                String selection = DataBase.FeedEntry.COLUMN_NAME_PACKAGE_NAME + " = ?";
-                String[] selectionArgs = { current_app_package };
-
-                // Search
-                Cursor currentAppCursor = db.query(
-                        DataBase.FeedEntry.TABLE_NAME, projection, selection,
-                        selectionArgs,null, null, null
-                );
-
-                // If found in data base
-                if (currentAppCursor.moveToNext()) {
-                    // Get lock status
-                    String lockedStatus = currentAppCursor.getString(currentAppCursor.
-                            getColumnIndex(DataBase.FeedEntry.COLUMN_NAME_LOCKED));
-
-                    // if locked do activity
-                    if (lockedStatus.equals("true")) {
+                // if locked do activity
+                if (!current_app_package.equals("NULL")) {
+                    if (db.isLocked(db.getChosenProfile(), current_app_package) && !recognition_running && allowed_app.equals("None")) {
+                        allowed_app = current_app_package;
+                        recognition_running = true;
                         Intent dialogIntent = new Intent(BlockService.this, UserLockRecognitionActivity.class);
                         dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(dialogIntent);
+                    } else if (current_app_package.equals(allowed_app) && recognition_running) {
+                        time_from_last_open = System.currentTimeMillis();
+                        recognition_running = false;
+                    } else if (!current_app_package.equals(allowed_app) &&
+                            !recognition_running && (System.currentTimeMillis() - time_from_last_open > 800)) {
+                        allowed_app = "None";
                     }
-
-                    Log.d("CURRENT APP", current_app_package);
                 }
-            }
-        };
+
+                Log.d("CURRENT APP", current_app_package);
+                }
+            };
         timer.schedule(timerTask, 0, 200);
     }
     public void stopTimerTask() {

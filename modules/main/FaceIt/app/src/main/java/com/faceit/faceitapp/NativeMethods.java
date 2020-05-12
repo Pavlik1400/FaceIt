@@ -22,6 +22,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.faceit.faceitapp.FaceRecognitionAppActivity;
+
 import org.opencv.core.Mat;
 
 // All computations is done in an asynchronous task, so we do not skip any frames
