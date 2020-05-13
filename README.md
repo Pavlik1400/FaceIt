@@ -54,7 +54,7 @@ Finally, the main UI class:
 - `FaceRecognitionActivity.java` - main UI Activity, which works as menu and which starts `AddUserActivity`, `DetailsActivity` and `BlockServise`. Here user can navidate throught all features of our app
 
 ## Project status
-Project is on the way to the open beta version. Just finishing some technical features. Version: 0.6.3-alpha
+Project is on the way to the open beta version. Just finishing some technical features. Version: 0.7.0-alpha
 
 ## How to use?
 1) **Install Android Studio, SDK and NDK**<br/>
