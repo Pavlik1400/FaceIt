@@ -24,7 +24,7 @@
         android:required="false" />
 
     <application
-        android:name=".MyNotification"
+        android:name=".Notification"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
@@ -52,7 +52,7 @@
         <activity
             android:name=".UserLockRecognitionActivity"
             android:label="FaceIt" />
-        <activity android:name=".DetailsActivity" />
+        <activity android:name=".ListOfAppsActivity" />
 
         <service android:name=".BlockService" />
 

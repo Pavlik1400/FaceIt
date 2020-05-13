@@ -10,7 +10,7 @@
         android:id="@+id/profilesRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="630dp"
-        app:layout_constraintBottom_toTopOf="@+id/editText"
+        app:layout_constraintBottom_toTopOf="@+id/profileNameEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

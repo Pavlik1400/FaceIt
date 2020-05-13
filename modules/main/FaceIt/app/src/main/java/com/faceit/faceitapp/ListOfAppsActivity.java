@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DetailsActivity extends AppCompatActivity {
+public class ListOfAppsActivity extends AppCompatActivity {
 
     private ArrayList<String> appsNames = new ArrayList<>();
     private ArrayList<String> appsPackageNames = new ArrayList<>();
@@ -55,7 +55,7 @@ public class DetailsActivity extends AppCompatActivity {
             }
         }
 
-        DataBase2 db = new DataBase2(getApplicationContext());
+        DataBase db = new DataBase(getApplicationContext());
 
         appsLocked = db.getAllLocked(db.getChosenProfile());
 
@@ -74,7 +74,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         db.close();
 
-        NewItemAdapter adapter = new NewItemAdapter(appsNames, appsPackageNames, appsLocked, appsIcons);
+        AppAdapter adapter = new AppAdapter(appsNames, appsPackageNames, appsLocked, appsIcons);
 
         appsRecyclerView.setAdapter(adapter);
 

@@ -64,7 +64,7 @@ public class ProfileItemAdapter extends RecyclerView.Adapter<ProfileItemAdapter.
         }
 
         void bind(final String profileName, final int position){
-            final DataBase2 db = new DataBase2(context);
+            final DataBase db = new DataBase(context);
             profileNameTextView.setText(profileName);
 
             chooseProfileCheckBox.setChecked(db.getChosenProfile().equals(profileName));

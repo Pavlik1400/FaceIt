@@ -8,17 +8,11 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
-
-import com.faceit.faceitapp.DataBase2;
-import com.faceit.faceitapp.R;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-import static com.faceit.faceitapp.MyNotification.CHANNEL_ID;
+import static com.faceit.faceitapp.Notification.CHANNEL_ID;
 
 public class BlockService extends Service {
     private Timer timer; //timer for scheduling service work
@@ -105,7 +99,7 @@ public class BlockService extends Service {
 
         timer = new Timer();
         // Get database
-        final DataBase2 db = new DataBase2(getApplicationContext());
+        final DataBase db = new DataBase(getApplicationContext());
 
         TimerTask timerTask = new TimerTask() {
             public void run() {

@@ -1,10 +1,7 @@
 package com.faceit.faceitapp;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +12,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.faceit.faceitapp.DataBase2;
-import com.faceit.faceitapp.R;
-
 import java.util.ArrayList;
-import java.util.List;
 
-public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemViewHolder>{
+public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
 
     LayoutInflater mInflater;
     private ArrayList<String> appsNames;
@@ -30,8 +23,8 @@ public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemView
     private ArrayList<Drawable> appsIcons;
     private Context context;
 
-    public NewItemAdapter(ArrayList<String> apps, ArrayList<String> packages,
-                          ArrayList<String> lockeds, ArrayList<Drawable> icons){
+    public AppAdapter(ArrayList<String> apps, ArrayList<String> packages,
+                      ArrayList<String> lockeds, ArrayList<Drawable> icons){
         appsNames = apps;
         appsPackageNames = packages;
         appsLocked = lockeds;
@@ -98,7 +91,7 @@ public class NewItemAdapter extends RecyclerView.Adapter<NewItemAdapter.ItemView
         }
     }
     public void setLocked(boolean locked, String package_name){
-        DataBase2 db = new DataBase2(context);
+        DataBase db = new DataBase(context);
 
         if (locked)
             db.setLocked(db.getChosenProfile(), package_name);

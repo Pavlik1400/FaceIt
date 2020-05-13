@@ -28,7 +28,7 @@ public class ProfilesActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         profilesRecyclerView.setLayoutManager(layoutManager);
 
-        final DataBase2 db = new DataBase2(getApplicationContext());
+        final DataBase db = new DataBase(getApplicationContext());
         final ArrayList<String> allProfiles = db.getAllProfiles();
 
         final ProfileItemAdapter adapter = new ProfileItemAdapter(allProfiles);

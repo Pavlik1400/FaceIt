@@ -20,14 +20,10 @@ package com.faceit.faceitapp;
 
 
 import android.app.AppOpsManager;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,23 +36,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.faceit.faceitapp.AddUserActivity;
-import com.faceit.faceitapp.AppInfo;
-import com.faceit.faceitapp.BlockService;
-import com.faceit.faceitapp.DataBase2;
-import com.faceit.faceitapp.DetailsActivity;
-import com.faceit.faceitapp.R;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class FaceRecognitionAppActivity extends AppCompatActivity {
-
-    // Flags for filtering apps
-    public static int flags = PackageManager.GET_META_DATA |
-            PackageManager.GET_SHARED_LIBRARY_FILES |
-            PackageManager.GET_UNINSTALLED_PACKAGES;
-
     // Gets ArrayList of installed applications
     // Gets ArrayList of installed applications
     private ArrayList<AppInfo> getInstalledApps() {
@@ -137,7 +120,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
 
         // Get list of apps and initialize writable database
         ArrayList<AppInfo> apps = getInstalledApps();
-        DataBase2 db = new DataBase2(getApplicationContext());
+        DataBase db = new DataBase(getApplicationContext());
         if (!db.hasProfile())
             db.createNewProfile("Default", "true");
 
@@ -159,7 +142,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent showDetailsActivity = new Intent(getApplicationContext(),
-                        DetailsActivity.class);
+                        ListOfAppsActivity.class);
                 ShowHideProgressBar(1);
                 startActivity(showDetailsActivity);
             }

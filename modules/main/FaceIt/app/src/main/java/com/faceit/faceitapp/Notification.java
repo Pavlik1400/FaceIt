@@ -6,7 +6,7 @@ import android.app.NotificationManager;
 import android.graphics.Color;
 import android.os.Build;
 
-public class MyNotification extends Application {
+public class Notification extends Application {
     //*Class for creating notification */
     public static final String CHANNEL_ID = "12121212";
 
