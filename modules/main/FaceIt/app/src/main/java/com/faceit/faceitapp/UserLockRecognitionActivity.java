@@ -47,12 +47,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.faceit.faceitapp.FaceRecognitionAppActivity;
-import com.faceit.faceitapp.NativeMethods;
-import com.faceit.faceitapp.TinyDB;
-
 import org.opencv.android.BaseLoaderCallback;
-import com.faceit.faceitapp.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
@@ -155,8 +150,8 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
-        faceThreshold = (float) 0.25; // Get initial value
-        distanceThreshold = (float) 0.075; // Get initial value
+        faceThreshold = (float) 0.12; // Get initial value
+        distanceThreshold = (float) 0.06; // Get initial value
         maximumImages = 50; // Get initial value
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
@@ -240,6 +235,7 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
 
                     if (faceDist < faceThreshold && minDist < distanceThreshold) { // 1. Near face space and near a face class
                         showToast("Recognised: " + imagesLabels.get(minIndex), Toast.LENGTH_LONG);
+                        //FaceRecognitionAppActivity.active = true;
                         finish();
                     }
                     else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class

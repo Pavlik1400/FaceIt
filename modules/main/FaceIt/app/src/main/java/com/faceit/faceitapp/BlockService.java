@@ -122,7 +122,7 @@ public class BlockService extends Service {
                         time_from_last_open = System.currentTimeMillis();
                         recognition_running = false;
                     } else if (!current_app_package.equals(allowed_app) &&
-                            !recognition_running && (System.currentTimeMillis() - time_from_last_open > 800)) {
+                            !recognition_running && (System.currentTimeMillis() - time_from_last_open > 500)) {
                         allowed_app = "None";
                     }
                 }

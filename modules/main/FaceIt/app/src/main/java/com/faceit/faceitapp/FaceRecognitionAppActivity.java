@@ -28,6 +28,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -57,26 +58,34 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
             PackageManager.GET_UNINSTALLED_PACKAGES;
 
     // Gets ArrayList of installed applications
-    public ArrayList<AppInfo> getInstalledApps() {
+    // Gets ArrayList of installed applications
+    private ArrayList<AppInfo> getInstalledApps() {
 
         ArrayList<AppInfo> res = new ArrayList<>();
         // Get list of aps with given flags (filters)
-        List<PackageInfo> packs = getPackageManager().getInstalledPackages(flags);
-        for(int i = 0; i < packs.size(); i++) {
-            // Filtering
-            PackageInfo p = packs.get(i);
-            if ((p.versionName == null) | ((p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1)) {
-                continue ;
+        final PackageManager packageManager = getApplicationContext().getPackageManager();
+        final List<PackageInfo> allInstalledPackages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+        for(PackageInfo p : allInstalledPackages) {
+            // add only apps with application icon
+            Intent intentOfStartActivity = packageManager.getLaunchIntentForPackage(p.packageName);
+            if(intentOfStartActivity == null)
+                continue;
+            Drawable applicationIcon = null;
+            try {
+                applicationIcon = packageManager.getActivityIcon(intentOfStartActivity);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
             }
-
-            // Adding to result
-            AppInfo newInfo = new AppInfo();
-            newInfo.app_name = p.applicationInfo.loadLabel(getPackageManager()).toString();
-            newInfo.package_name = p.packageName;
-            res.add(newInfo);
+            if(applicationIcon != null && !packageManager.getDefaultActivityIcon().equals(applicationIcon) && !getApplicationContext().getPackageName().equals(p.packageName)) {
+                AppInfo newInfo = new AppInfo();
+                newInfo.app_name = p.applicationInfo.loadLabel(getPackageManager()).toString();
+                newInfo.package_name = p.packageName;
+                res.add(newInfo);
+            }
         }
         return res;
     }
+
 
     private static Button showButton; // Button that shows
     public static ProgressBar loadingProgressBar;

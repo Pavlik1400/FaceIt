@@ -1,7 +1,9 @@
 package com.faceit.faceitapp;
 
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
@@ -39,15 +41,24 @@ public class DetailsActivity extends AppCompatActivity {
 
         // Create hash map package_name - icon
         HashMap<String, Drawable> icons = new HashMap<>();
-        List<PackageInfo> packs = getPackageManager().getInstalledPackages(com.faceit.faceitapp.FaceRecognitionAppActivity.flags);
-        for(int i=0;i<packs.size();i++) {
-            PackageInfo p = packs.get(i);
-            if ((p.versionName == null) | ((p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 1)) {
+        final PackageManager packageManager = getApplicationContext().getPackageManager();
+        final List<PackageInfo> allInstalledPackages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+        for(PackageInfo p : allInstalledPackages) {
+            // add only apps with application icon
+            Intent intentOfStartActivity = packageManager.getLaunchIntentForPackage(p.packageName);
+            if(intentOfStartActivity == null)
                 continue;
+            Drawable applicationIcon = null;
+            try {
+                applicationIcon = packageManager.getActivityIcon(intentOfStartActivity);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
             }
-            Drawable icon = p.applicationInfo.loadIcon(getPackageManager());
-            String package_name = p.packageName;
-            icons.put(package_name, icon);
+            if(applicationIcon != null && !packageManager.getDefaultActivityIcon().equals(applicationIcon) && !getApplicationContext().getPackageName().equals(p.packageName)) {
+                String package_name = p.packageName;
+                icons.put(package_name, applicationIcon);
+                Log.d("apps", package_name);
+            }
         }
 
         DataBase2 db = new DataBase2(getApplicationContext());

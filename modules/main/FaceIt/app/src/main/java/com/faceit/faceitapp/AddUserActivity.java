@@ -58,8 +58,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.faceit.faceitapp.R;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -94,6 +92,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private TinyDB tinydb;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
+    private int unique_photo_num_left = 2;
 
     private void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
@@ -264,8 +263,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
-        faceThreshold = (float) 0.2; // Get initial value
-        distanceThreshold = (float) 0.15; // Get initial value
+        faceThreshold = (float) 0.18; // Get initial value
+        distanceThreshold = (float) 0.07; // Get initial value
         maximumImages = 50; // Get initial value
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
@@ -355,32 +354,37 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                     Log.i(TAG, "dist[" + minIndex + "]: " + minDist + ", face dist: " + faceDist + ", label: " + imagesLabels.get(minIndex));
 
                     if (faceDist < faceThreshold && minDist < distanceThreshold) { // 1. Near face space and near a face class
-                        showToast("User added: " + imagesLabels.get(minIndex), Toast.LENGTH_LONG);
-                        images.remove(images.size() - 1);
-                        trainFaces();
-                        tinydb.putListMat("images", images);
-                        tinydb.putListString("imagesLabels", imagesLabels);
-                        finish();
+                        if (unique_photo_num_left < 1) {
+                            showToast("User added: " + imagesLabels.get(minIndex), Toast.LENGTH_SHORT);
+                            //images.remove(images.size() - 1);
+                            addLabel(imagesLabels.get(minIndex));
+                            trainFaces();
+                            tinydb.putListMat("images", images);
+                            tinydb.putListString("imagesLabels", imagesLabels);
+                            finish();
+                        }else {
+                            showToast("Please, more more photos from different edge", Toast.LENGTH_SHORT);
+                            images.remove(images.size() - 1);
+                        }
                     }
                     else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class
-                        showLabelsDialog();
-                        showToast("Unknown face", Toast.LENGTH_LONG);
+                        showToast("Face added", Toast.LENGTH_SHORT);
+                        unique_photo_num_left = unique_photo_num_left - 1;
                     }
                     else if (minDist < distanceThreshold) { // 3. Distant from face space and near a face class
-                        showToast("False recognition", Toast.LENGTH_LONG);
+                        showToast("Face added.1", Toast.LENGTH_SHORT);
+                        unique_photo_num_left = unique_photo_num_left - 1;
                     }
                     else { // 4. Distant from face space and not near a known face class.
-                        showToast("Image is not a face", Toast.LENGTH_LONG);
+                        showToast("Take more photos!!", Toast.LENGTH_SHORT);
                     }
                 } else {
-                    showToast("everything is wrong", Toast.LENGTH_LONG);
+                    showToast("everything is wrong", Toast.LENGTH_SHORT);
                 }
             } else {
                 Log.w(TAG, "Array is null");
-                if (useEigenfaces || uniqueLabels == null || uniqueLabels.length > 1)
+                if (uniqueLabels == null || uniqueLabels.length > 1)
                     showToast("Please, make some more photos", Toast.LENGTH_SHORT);
-                else
-                    showToast("Fisherfaces needs two different faces", Toast.LENGTH_SHORT);
             }
         }
     };
