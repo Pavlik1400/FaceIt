@@ -72,7 +72,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public CameraBridgeViewBase(Context context, int cameraId) {
         super(context);
         construct(context, cameraId);
-
     }
 
     public CameraBridgeViewBase(Context context, AttributeSet attrs) {
@@ -90,6 +89,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         construct(context, cameraId);
     }
 
+    /*
+    * Sets basic camera variables and constructs Window Manager
+    * */
     private void construct(Context context, int cameraId) {
         mCameraIndex = cameraId;
         getHolder().addCallback(this);
@@ -98,6 +100,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
+    /*
+    * Changes front and back cameras (flips them)
+    * */
     public void flipCamera() {
         disableView();
         if (this.mCameraIndex == CAMERA_ID_FRONT)
@@ -650,9 +655,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                 if (mScale != 0) {
                     canvas.scale(mScale, mScale, 0, 0);
                 }
-
-                if (BuildConfig.DEBUG)
-                    Log.v(TAG, "mStretch value: " + mScale);
 
                 canvas.drawBitmap(outputBitmap, 0, 0, null);
 

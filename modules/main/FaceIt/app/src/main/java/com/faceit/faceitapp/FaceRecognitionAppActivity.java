@@ -139,7 +139,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
         ArrayList<AppInfo> apps = getInstalledApps();
         DataBase2 db = new DataBase2(getApplicationContext());
         if (!db.hasProfile())
-            db.createNewProfile("Default");
+            db.createNewProfile("Default", "true");
 
 
         // iterate through found applications and update db if needed
@@ -188,5 +188,10 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
          */
         Intent serviceIntent = new Intent(this, BlockService.class);
         stopService(serviceIntent);
+    }
+
+    public void showProfiles(View v){
+        Intent showProfilesIntent = new Intent(this, ProfilesActivity.class);
+        startActivity(showProfilesIntent);
     }
 }

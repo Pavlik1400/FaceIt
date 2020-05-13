@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
 
@@ -64,7 +65,7 @@ public class DataBase2 extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    void createNewProfile(String profileName){
+    void createNewProfile(String profileName, String status){
         // Creates new empty profile with name [profileName].
 
         // access to database
@@ -73,11 +74,21 @@ public class DataBase2 extends SQLiteOpenHelper {
         // create new row with given name, it is selected by default, no locked apps
         ContentValues values = new ContentValues();
         values.put(DataBase2.COLUMN_PROFILE_NAME, profileName);
-        values.put(DataBase2.COLUMN_PROFILE_STATUS, "true");
+        values.put(DataBase2.COLUMN_PROFILE_STATUS, status);
         values.put(DataBase2.COLUMN_LOCKED_APPS, "");
 
         db.insert(DataBase2.TABLE_PROFILES, null, values);
 
+    }
+
+    void deleteProfile(String profileName){
+        // Creates new empty profile with name [profileName].
+
+        // access to database
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(DataBase2.TABLE_PROFILES, DataBase2.COLUMN_PROFILE_NAME + " = ?",
+                  new String[] {profileName});
     }
 
     boolean hasProfile(){
@@ -193,6 +204,20 @@ public class DataBase2 extends SQLiteOpenHelper {
         return "ERROR";
     }
 
+    ArrayList<String> getAllProfiles(){
+        // access to database
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ArrayList<String> res = new ArrayList<>();
+        // get all installed apps
+        Cursor allProfiles = db.rawQuery("select * from " + DataBase2.TABLE_PROFILES,null);
+
+        while(allProfiles.moveToNext()){
+            res.add(allProfiles.getString(allProfiles.getColumnIndex(DataBase2.COLUMN_PROFILE_NAME)));
+        }
+        return res;
+    }
+
     void setChosenProfile(String profileName){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
@@ -204,12 +229,12 @@ public class DataBase2 extends SQLiteOpenHelper {
         ContentValues unsetterChosenProfile = new ContentValues();
         unsetterChosenProfile.put(DataBase2.COLUMN_PROFILE_STATUS, "false");
         db.update(DataBase2.TABLE_PROFILES, unsetterChosenProfile,
-                  DataBase2.COLUMN_PROFILE_NAME, new String[] {oldProfile});
+                  DataBase2.COLUMN_PROFILE_NAME + " = ?", new String[] {oldProfile});
 
         ContentValues setterChosenProfile = new ContentValues();
         setterChosenProfile.put(DataBase2.COLUMN_PROFILE_STATUS, "true");
         db.update(DataBase2.TABLE_PROFILES, setterChosenProfile,
-                DataBase2.COLUMN_PROFILE_NAME, new String[] {profileName});
+                DataBase2.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName});
     }
 
     ArrayList<String> getAllApps(){

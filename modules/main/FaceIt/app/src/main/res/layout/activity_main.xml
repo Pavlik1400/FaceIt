@@ -17,6 +17,15 @@
         />
 
     <Button
+        android:id="@+id/profilesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Profiles"
+        android:textSize="20sp"
+        android:onClick="showProfiles"
+        />
+
+    <Button
         android:id="@+id/adduserbutton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

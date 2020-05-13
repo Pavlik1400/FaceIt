@@ -28,7 +28,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,7 +35,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -64,14 +62,10 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -87,13 +81,17 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private Toast mToast;
     private boolean useEigenfaces = true;
     private float faceThreshold, distanceThreshold;
-    private int maximumImages;
     private SharedPreferences prefs;
     private TinyDB tinydb;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private int unique_photo_num_left = 2;
 
+    /*
+    * Show small messages to user
+    * @param message - string message yuo want to show
+    * @param duration - duration of message
+    * */
     private void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
             throw new IllegalArgumentException();
@@ -103,6 +101,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         mToast.show();
     }
 
+    /*
+    * Ads a name label related to the last photo taken
+    * @param string - name of user
+    * */
     private void addLabel(String string) {
         String label = string.substring(0, 1).toUpperCase(Locale.US) + string.substring(1).trim().toLowerCase(Locale.US); // Make sure that the name is always uppercase and rest is lowercase
         imagesLabels.add(label); // Add label to list of labels
@@ -139,6 +141,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         return true;
     }
 
+    /*
+    * Checks the callback from training algorithm and shows message result
+    * */
     private NativeMethods.TrainFacesTask.Callback trainFacesTaskCallback = new NativeMethods.TrainFacesTask.Callback() {
         @Override
         public void onTrainFacesComplete(boolean result) {
@@ -149,6 +154,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
+    /*
+    * Shows dialog where user can add new labels or
+    * use existing to set a connection between users and photos
+    * */
     private void showLabelsDialog() {
         Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
         if (!uniqueLabelsSet.isEmpty()) { // Make sure that there are any labels
@@ -201,6 +210,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             showEnterLabelDialog(); // If there is no existing labels, then ask the user for a new label
     }
 
+    /*
+    * Shows dialog of creating new label
+    * */
     private void showEnterLabelDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(AddUserActivity.this);
         builder.setTitle("Please enter your name:");
@@ -256,20 +268,20 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         setSupportActionBar(mToolbar); // Sets the Toolbar to act as the ActionBar for this Activity window
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
-        faceThreshold = (float) 0.18; // Get initial value
-        distanceThreshold = (float) 0.07; // Get initial value
-        maximumImages = 50; // Get initial value
+
+        // Limit constants
+        faceThreshold = (float) 0.18; // Used for differentiating faces with each other
+        distanceThreshold = (float) 0.07; // Used for checking face distances
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
             NativeMethods.MeasureDistTask mMeasureDistTask;
 
+            /*
+            * Method that starts "Take photo" button
+            * */
             @Override
             public void onClick(View v) {
                 if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
@@ -293,17 +305,26 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 Size imageSize = new Size(200, 200);
                 Imgproc.resize(mGray, mGray, imageSize);
                 Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
-                //SaveImage(mGray);
 
                 Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
                 Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
+                if (!images.isEmpty()){
+                    if (image.height() != images.get(0).height()){
+                        showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
+                        return;
+                    }
+                    if (image.width() != images.get(0).width()){
+                        showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
+                        return;
+                    }
+                    if (image.total() != images.get(0).total()){
+                        showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
+                        return;
+                    }
+                }
+
                 images.add(image); // Add current image to the array
 
-                /*if (images.size() > maximumImages) {
-                    images.remove(0); // Remove first image
-                    imagesLabels.remove(0); // Remove first label
-                    Log.i(TAG, "The number of images is limited to: " + images.size());
-                }*/
 
                 // Calculate normalized Euclidean distance
                 mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
@@ -313,6 +334,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             }
         });
 
+        /*
+         * Flip camera animation on double tap
+         * */
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
@@ -338,6 +362,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         });
     }
 
+    /*
+     * Callback from user in database search.
+     * */
     private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
         @Override
         public void onMeasureDistComplete(Bundle bundle) {
@@ -356,7 +383,6 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                     if (faceDist < faceThreshold && minDist < distanceThreshold) { // 1. Near face space and near a face class
                         if (unique_photo_num_left < 1) {
                             showToast("User added: " + imagesLabels.get(minIndex), Toast.LENGTH_SHORT);
-                            //images.remove(images.size() - 1);
                             addLabel(imagesLabels.get(minIndex));
                             trainFaces();
                             tinydb.putListMat("images", images);
@@ -389,6 +415,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
+    /*
+    * Permission checker
+    * */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -437,6 +466,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             loadOpenCV();
     }
 
+    /*
+    * Loads Native (C++) libs and database of images and username labels
+    * */
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -465,6 +497,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
+    /*
+    * Loads OpenCV
+    * */
     private void loadOpenCV() {
         if (!OpenCVLoader.initDebug(true)) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
@@ -482,16 +517,25 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             mOpenCvCameraView.disableView();
     }
 
+    /*
+    * RGB and Grayscale vectors for photo processing creation
+    * */
     public void onCameraViewStarted(int width, int height) {
         mGray = new Mat();
         mRgba = new Mat();
     }
 
+    /*
+     * RGB and Grayscale vectors for photo processing release
+     * */
     public void onCameraViewStopped() {
         mGray.release();
         mRgba.release();
     }
 
+    /*
+    * Takes and preprocess photo
+    * */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat mGrayTmp = inputFrame.gray();
         Mat mRgbaTmp = inputFrame.rgba();
@@ -546,28 +590,6 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         return mRgba;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void SaveImage(Mat mat) {
-        Mat mIntermediateMat = new Mat();
-
-        if (mat.channels() == 1) // Grayscale image
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_GRAY2BGR);
-        else
-            Imgproc.cvtColor(mat, mIntermediateMat, Imgproc.COLOR_RGBA2BGR);
-
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), TAG); // Save pictures in Pictures directory
-        path.mkdir(); // Create directory if needed
-        String fileName = "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(new Date()) + ".png";
-        File file = new File(path, fileName);
-
-        boolean bool = Imgcodecs.imwrite(file.toString(), mIntermediateMat);
-
-        if (bool)
-            Log.i(TAG, "SUCCESS writing image to external storage");
-        else
-            Log.e(TAG, "Failed writing image to external storage");
-    }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -577,6 +599,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             super.onBackPressed();
     }
 
+    /*
+    * Menu for camera icon
+    * */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_face_recognition_app, menu);
@@ -589,6 +614,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         return true;
     }
 
+    /*
+    * Camera flip animation
+    * */
     private void flipCameraAnimation() {
         // Flip the camera
         mOpenCvCameraView.flipCamera();
@@ -621,6 +649,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         animator.start();
     }
 
+    /*
+    * Camera flip by pressing camera icon
+    * */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

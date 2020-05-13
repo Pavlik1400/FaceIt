@@ -22,8 +22,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.faceit.faceitapp.FaceRecognitionAppActivity;
-
 import org.opencv.core.Mat;
 
 // All computations is done in an asynchronous task, so we do not skip any frames
@@ -62,6 +60,9 @@ class NativeMethods {
             this.callback = callback;
         }
 
+        /*
+        * Starts task of training from image database
+        * */
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
@@ -76,6 +77,9 @@ class NativeMethods {
             }
         }
 
+        /*
+        * Callback of training
+        * */
         @Override
         protected void onPostExecute(Boolean result) {
             callback.onTrainFacesComplete(result);
@@ -86,6 +90,9 @@ class NativeMethods {
         }
     }
 
+    /*
+    * Class for processing and recognising images
+    * */
     static class MeasureDistTask extends AsyncTask<Mat, Void, Bundle> {
         static final String MIN_DIST_FLOAT = "minDist";
         static final String MIN_DIST_INDEX_INT = "minDistIndex";
@@ -104,6 +111,9 @@ class NativeMethods {
             this.callback = callback;
         }
 
+        /*
+        * Starts task of photo recognition
+        * */
         @Override
         protected Bundle doInBackground(Mat... mat) {
             float[] minDist = new float[] { -1 };

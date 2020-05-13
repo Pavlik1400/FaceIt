@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 import org.opencv.BuildConfig;
-import com.faceit.faceitapp.CameraBridgeViewBase;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -73,6 +72,10 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         super(context, attrs);
     }
 
+    /*
+    * Tries to start camera
+    * @param width, height - frame size
+    * */
     @SuppressLint("ObsoleteSdkInt")
     protected boolean initializeCamera(int width, int height) {
         Log.d(TAG, "Initialize java camera");
@@ -226,6 +229,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         return result;
     }
 
+    /*
+    * Stops camera
+    * */
     protected void releaseCamera() {
         synchronized (this) {
             if (mCamera != null) {
@@ -248,6 +254,10 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
     private boolean mCameraFrameReady = false;
 
+    /*
+    * Connects to the camera
+    * @param width, height - frame size
+    * */
     @Override
     protected boolean connectCamera(int width, int height) {
 
@@ -270,6 +280,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         return true;
     }
 
+    /*
+     * Stops camera thread and camera itsels
+     * */
     @Override
     protected void disconnectCamera() {
         /* 1. We need to stop thread which updating the frames
@@ -299,8 +312,6 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
     @Override
     public void onPreviewFrame(byte[] frame, Camera arg1) {
-        if (BuildConfig.DEBUG)
-            Log.d(TAG, "Preview Frame received. Frame size: " + frame.length);
         synchronized (this) {
             mFrameChain[mChainIdx].put(0, 0, frame);
             mCameraFrameReady = true;
@@ -310,6 +321,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
             mCamera.addCallbackBuffer(mBuffer);
     }
 
+    /*
+    * Special frame class for easier frame processing
+    * */
     private class JavaCameraFrame implements CvCameraViewFrame {
         @Override
         public Mat gray() {
