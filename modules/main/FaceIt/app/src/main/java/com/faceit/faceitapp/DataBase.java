@@ -5,8 +5,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
+import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class DataBase extends SQLiteOpenHelper {
     static final String TABLE_PROFILES = "profiles";
@@ -18,6 +27,9 @@ public class DataBase extends SQLiteOpenHelper {
     static final String TABLE_ALL_APPS = "all_apps";
     static final String COLUMN_APP_NAME = "name";
     static final String COLUMN_PACKAGE_NAME = "package_name";
+
+    static final String TABLE_PASSWORD = "password_table";
+    static final String COLUMN_PASSWORD = "password";
 
 
 
@@ -37,11 +49,19 @@ public class DataBase extends SQLiteOpenHelper {
                     COLUMN_APP_NAME + " TEXT," +
                     COLUMN_PACKAGE_NAME + " TEXT" + ")";
 
+    private static final String SQL_CREATE_PASSWORD =
+            "CREATE TABLE " + TABLE_PASSWORD + " (" +
+                    _ID + " TEXT," +
+                    COLUMN_PASSWORD + " TEXT" + ")";
+
     private static final String SQL_DELETE_PROFILES =
             "DROP TABLE IF EXISTS " + TABLE_PROFILES;
 
     private static final String SQL_DELETE_APPS =
             "DROP TABLE IF EXISTS " + TABLE_ALL_APPS;
+
+    private static final String SQL_DELETE_PASSWORD =
+            "DROP TABLE IF EXISTS " + TABLE_PASSWORD;
 
     public DataBase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,17 +71,67 @@ public class DataBase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_PROFILES);
         db.execSQL(SQL_CREATE_APPS);
+        db.execSQL(SQL_CREATE_PASSWORD);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_PROFILES);
         db.execSQL(SQL_DELETE_APPS);
+        db.execSQL(SQL_DELETE_PASSWORD);
         onCreate(db);
     }
 
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    static private String encode(String text) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
+        return String.format("%0" + (hash.length*2) + "X", new BigInteger(1, hash));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    void setPassword(String password) throws NoSuchAlgorithmException {
+        // access to db
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues value = new ContentValues();
+        value.put(DataBase.COLUMN_PASSWORD, encode(password));
+
+        Cursor passwordCursor = db.rawQuery("select * from " + DataBase.TABLE_PASSWORD,null);
+
+        if (passwordCursor.moveToNext()){
+            String oldPassword = passwordCursor.getString(passwordCursor.getColumnIndex(DataBase.COLUMN_PASSWORD));
+            db.update(DataBase.TABLE_PASSWORD, value,
+                    DataBase.COLUMN_PASSWORD + " = ?", new String[] {oldPassword});
+        }
+        else {
+            // if there is no password then insert
+            Log.d("ISNERTEDPASSWORD", encode(password));
+            db.insert(DataBase.TABLE_PASSWORD, null, value);
+        }
+
+    }
+
+    boolean hasPassword(){
+        // access to db
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor passwordCursor = db.rawQuery("select * from " + DataBase.TABLE_PASSWORD,null);
+        return passwordCursor.moveToNext();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    boolean checkPassword(String password) throws NoSuchAlgorithmException {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String encodedPassword = encode(password);
+
+        Cursor passwordCursor = db.rawQuery("select * from " + DataBase.TABLE_PASSWORD,null);
+        passwordCursor.moveToNext();
+        String actualHashedPassword = passwordCursor.getString(passwordCursor.getColumnIndex(DataBase.COLUMN_PASSWORD));
+        return actualHashedPassword.equals(encodedPassword);
     }
 
     void createNewProfile(String profileName, String status){

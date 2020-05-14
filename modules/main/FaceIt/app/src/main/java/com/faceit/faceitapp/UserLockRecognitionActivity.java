@@ -21,19 +21,26 @@ package com.faceit.faceitapp;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import android.text.InputType;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -42,6 +49,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -52,6 +61,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -71,6 +81,10 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
     private TinyDB tinydb;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
+    private final int delay_photo_take = 500;
+    private Handler handler = new Handler();
+    private NativeMethods.MeasureDistTask mMeasureDistTask;
+    private boolean flag_password_correct = false;
 
     private void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
@@ -112,6 +126,68 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         return true;
     }
 
+    private void showEnterPasswordDialog() {
+        handler.removeCallbacksAndMessages(null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(UserLockRecognitionActivity.this);
+        builder.setTitle("Please enter your password:");
+
+        final EditText input = new EditText(UserLockRecognitionActivity.this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("Submit", null); // Set up positive button, but do not provide a listener, so we can check the string before dismissing the dialog
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                scheduleRecognition();
+            }
+        });
+        builder.setCancelable(false); // User has to input a password
+        AlertDialog dialog = builder.create();
+
+        // Source: http://stackoverflow.com/a/7636468/2175837
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(final DialogInterface dialog) {
+                Button mButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                mButton.setOnClickListener(new View.OnClickListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+                    @Override
+                    public void onClick(View view) {
+                        String password = input.getText().toString().trim();
+                        if (!password.isEmpty()) { // Make sure the input is valid
+                            // If input is valid, dismiss the dialog and start password in database check
+                            dialog.dismiss();
+                            DataBase db = new DataBase(getApplicationContext());
+                            try {
+                                flag_password_correct = db.checkPassword(password);
+                            } catch (NoSuchAlgorithmException e) {
+                                e.printStackTrace();
+                            }
+                            if (flag_password_correct) {
+                                showToast("Password correct", Toast.LENGTH_SHORT);
+                                finish();
+                            }
+                            else {
+                                scheduleRecognition();
+                            }
+                        }else {
+                            showToast("Invalid password", Toast.LENGTH_SHORT);
+                            scheduleRecognition();
+                        }
+                    }
+                });
+            }
+        });
+
+        // Show keyboard, so the user can start typing straight away
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        dialog.show();
+    }
+
     private NativeMethods.TrainFacesTask.Callback trainFacesTaskCallback = new NativeMethods.TrainFacesTask.Callback() {
         @Override
         public void onTrainFacesComplete(boolean result) {
@@ -122,82 +198,91 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     };
 
+    public void recognise(){
+        {
+
+            if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
+                Log.i(TAG, "mMeasureDistTask is still running");
+                //showToast("Still processing old image...", Toast.LENGTH_SHORT);
+                return;
+            }
+            if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
+                Log.i(TAG, "mTrainFacesTask is still running");
+                //showToast("Still training...", Toast.LENGTH_SHORT);
+                return;
+            }
+
+            Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
+            if (mGray.total() == 0)
+                return;
+
+            // Scale image in order to decrease computation time and make the image square,
+            // so it does not crash on phones with different aspect ratios for the front
+            // and back camera
+            Size imageSize = new Size(700, 700);
+            Imgproc.resize(mGray, mGray, imageSize);
+            Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
+
+            Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
+            Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
+
+            if (!images.isEmpty()){
+                if (image.height() != images.get(0).height()){
+                    //showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
+                    return;
+                }
+                if (image.width() != images.get(0).width()){
+                    //showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
+                    return;
+                }
+                if (image.total() != images.get(0).total()){
+                    //showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
+                    return;
+                }
+            }
+
+            // Calculate normalized Euclidean distance
+            mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
+            mMeasureDistTask.execute(image);
+        }
+    }
+
+    public void scheduleRecognition() {
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                recognise();  // this method will starts every DELAY miliseconds
+                handler.postDelayed(this, delay_photo_take);
+            }
+        }, delay_photo_take);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_face_recognition_app);
+        setContentView(R.layout.activity_recognise);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar); // Sets the Toolbar to act as the ActionBar for this Activity window
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        //ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        //drawer.addDrawerListener(toggle);
-        //toggle.syncState();
-
         useEigenfaces = true;
 
         // Set radio button based on value stored in shared preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
-        faceThreshold = (float) 0.12; // Get initial value
-        distanceThreshold = (float) 0.06; // Get initial value
+        faceThreshold = (float) 0.05; // Get initial value
+        distanceThreshold = (float) 0.05; // Get initial value
         maximumImages = 50; // Get initial value
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
-            NativeMethods.MeasureDistTask mMeasureDistTask;
-
             @Override
             public void onClick(View v) {
-                if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
-                    Log.i(TAG, "mMeasureDistTask is still running");
-                    showToast("Still processing old image...", Toast.LENGTH_SHORT);
-                    return;
-                }
-                if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
-                    Log.i(TAG, "mTrainFacesTask is still running");
-                    showToast("Still training...", Toast.LENGTH_SHORT);
-                    return;
-                }
-
-                Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
-                if (mGray.total() == 0)
-                    return;
-
-                // Scale image in order to decrease computation time and make the image square,
-                // so it does not crash on phones with different aspect ratios for the front
-                // and back camera
-                Size imageSize = new Size(200, 200);
-                Imgproc.resize(mGray, mGray, imageSize);
-                Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
-
-                Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
-                Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
-
-                if (!images.isEmpty()){
-                    if (image.height() != images.get(0).height()){
-                        showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
-                        return;
-                    }
-                    if (image.width() != images.get(0).width()){
-                        showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
-                        return;
-                    }
-                    if (image.total() != images.get(0).total()){
-                        showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
-                        return;
-                    }
-                }
-
-                // Calculate normalized Euclidean distance
-                mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
-                mMeasureDistTask.execute(image);
+                showEnterPasswordDialog();
             }
         });
-
 
         /*
         * Flip camera animation on double tap
@@ -225,6 +310,13 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                 return mGestureDetector.onTouchEvent(event);
             }
         });
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                scheduleRecognition();
+            }
+        }, 1000);   //1 second
     }
 
     /*
@@ -250,21 +342,24 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
 
                     if (faceDist < faceThreshold && minDist < distanceThreshold) { // 1. Near face space and near a face class
                         showToast("Recognised: " + imagesLabels.get(minIndex), Toast.LENGTH_LONG);
+                        if (mOpenCvCameraView != null)
+                            mOpenCvCameraView.disableView();
+                        handler.removeCallbacksAndMessages(null);
                         finish();
                     }
                     else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class
-                        showToast("Unknown face", Toast.LENGTH_LONG);
+                        //showToast("Unknown face", Toast.LENGTH_LONG);
                     }
                     else if (minDist < distanceThreshold) { // 3. Distant from face space and near a face class
-                        showToast("False recognition", Toast.LENGTH_LONG);
+                        //showToast("False recognition", Toast.LENGTH_LONG);
                         //images.remove(images.size() - 1); // Remove last image
                     }
                     else { // 4. Distant from face space and not near a known face class.
-                        showToast("Image is not a face", Toast.LENGTH_LONG);
+                        //showToast("Image is not a face", Toast.LENGTH_LONG);
                         //images.remove(images.size() - 1); // Remove last image
                     }
                 } else {
-                    showToast("everything is wrong", Toast.LENGTH_LONG);
+                    //showToast("everything is wrong", Toast.LENGTH_LONG);
                 }
             } else {
                 Log.w(TAG, "Array is null");

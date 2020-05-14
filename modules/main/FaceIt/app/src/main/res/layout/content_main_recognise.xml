@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".FaceRecognitionAppActivity"
-    tools:showIn="@layout/app_bar_main">
+    tools:showIn="@layout/app_bar_add_user">
 
     <LinearLayout
         style="?metaButtonBarStyle"
@@ -22,11 +22,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@color/black_overlay"
             android:paddingTop="20dp"
             android:paddingBottom="20dp"
-            android:background="@color/black_overlay"
-            android:textColor="@android:color/white"
-            android:text="@string/picture_button" />
+            android:text="Enter Password"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 

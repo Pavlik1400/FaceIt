@@ -85,7 +85,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private TinyDB tinydb;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
-    private int unique_photo_num_left = 2;
+    private int unique_photo_num_left = 0;
 
     /*
     * Show small messages to user
@@ -263,7 +263,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_face_recognition_app);
+        setContentView(R.layout.activity_add_user);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar); // Sets the Toolbar to act as the ActionBar for this Activity window
 
@@ -273,8 +273,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
 
         // Limit constants
-        faceThreshold = (float) 0.18; // Used for differentiating faces with each other
-        distanceThreshold = (float) 0.07; // Used for checking face distances
+        faceThreshold = (float) 0.05; // Used for differentiating faces with each other
+        distanceThreshold = (float) 0.05; // Used for checking face distances
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
             NativeMethods.MeasureDistTask mMeasureDistTask;
@@ -302,7 +302,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 // Scale image in order to decrease computation time and make the image square,
                 // so it does not crash on phones with different aspect ratios for the front
                 // and back camera
-                Size imageSize = new Size(200, 200);
+                Size imageSize = new Size(700, 700);
                 Imgproc.resize(mGray, mGray, imageSize);
                 Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
 

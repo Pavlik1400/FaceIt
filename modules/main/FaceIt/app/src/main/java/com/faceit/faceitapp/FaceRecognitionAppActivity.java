@@ -96,13 +96,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
 
 
-        Button adduserButton = (Button) findViewById(R.id.adduserbutton);
-        adduserButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(FaceRecognitionAppActivity.this, AddUserActivity.class));
-            }
-        });
+
 
         /* Check whether needed permission is granted
         and if not, open settings to let user grant it
@@ -121,9 +115,17 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
         // Get list of apps and initialize writable database
         ArrayList<AppInfo> apps = getInstalledApps();
         DataBase db = new DataBase(getApplicationContext());
-        if (!db.hasProfile())
+        if (!db.hasProfile() || !db.hasPassword()) {
             db.createNewProfile("Default", "true");
-
+            Intent setPasswordIntent = new Intent(getApplicationContext(), PasswordActivity.class);
+            setPasswordIntent.putExtra("mode", "set");
+            startActivity(setPasswordIntent);
+        }
+        else{
+            Intent checkPasswordIntent = new Intent(getApplicationContext(), PasswordActivity.class);
+            checkPasswordIntent.putExtra("mode", "check");
+            startActivity(checkPasswordIntent);
+        }
 
         // iterate through found applications and update db if needed
         for (AppInfo app: apps){
@@ -147,6 +149,14 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
                 startActivity(showDetailsActivity);
             }
         };
+
+        Button adduserButton = findViewById(R.id.adduserbutton);
+        adduserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(FaceRecognitionAppActivity.this, AddUserActivity.class));
+            }
+        });
 
         showButton.setOnClickListener(onClickListener);
 
@@ -176,5 +186,11 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
     public void showProfiles(View v){
         Intent showProfilesIntent = new Intent(this, ProfilesActivity.class);
         startActivity(showProfilesIntent);
+    }
+
+    public void passwordActivity(View v){
+        Intent passwordIntent = new Intent(this, PasswordActivity.class);
+        passwordIntent.putExtra("mode", "update");
+        startActivity(passwordIntent);
     }
 }

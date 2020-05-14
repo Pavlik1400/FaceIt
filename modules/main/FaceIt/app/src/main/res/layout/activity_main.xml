@@ -6,7 +6,8 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    tools:context=".FaceRecognitionAppActivity">
+    tools:context=".FaceRecognitionAppActivity"
+    >
 
     <Button
         android:id="@+id/showButton"
@@ -47,6 +48,15 @@
         android:text="Stop Service"
         android:textSize="20sp"
         android:onClick="stopService"
+        />
+
+    <Button
+        android:id="@+id/updateButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update password"
+        android:textSize="20sp"
+        android:onClick="passwordActivity"
         />
 
     <ProgressBar

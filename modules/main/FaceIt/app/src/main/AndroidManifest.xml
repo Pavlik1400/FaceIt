@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.faceit.faceitapp">
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission
@@ -31,10 +32,10 @@
         android:label="FaceIt"
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
+        <activity android:name=".PasswordActivity"></activity>
         <activity
             android:name=".ProfilesActivity"
-            android:windowSoftInputMode="adjustResize"
-            />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".FaceRecognitionAppActivity"
             android:label="FaceIt"
