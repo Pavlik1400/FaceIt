@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -105,7 +106,7 @@ public class BlockService extends Service {
             public void run() {
                 String current_app_package = getActiveApps();
                 // if locked do activity
-                if (!current_app_package.equals("NULL")) {
+                if (!current_app_package.equals("NULL") && !current_app_package.equals("android")) {
                     if (db.isLocked(db.getChosenProfile(), current_app_package) && !recognition_running && allowed_app.equals("None")) {
                         allowed_app = current_app_package;
                         recognition_running = true;
