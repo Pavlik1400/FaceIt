@@ -1,3 +1,7 @@
+/**
+ * This class is adapter for recyclerView that shows all installed apps
+ */
+
 package com.faceit.faceitapp;
 
 import android.content.Context;
@@ -16,6 +20,7 @@ import java.util.ArrayList;
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
 
+    // init all containers that will be used, inflater for one holder and context
     LayoutInflater mInflater;
     private ArrayList<String> appsNames;
     private ArrayList<String> appsPackageNames;
@@ -23,6 +28,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
     private ArrayList<Drawable> appsIcons;
     private Context context;
 
+    /**
+     * Constructor. Its purpose - save given information.
+     * @param apps - ArrayList of all names of apps
+     * @param packages - ArrayList of all package names in apps
+     * @param lockeds - ArrayList of package names of locked apps
+     * @param icons - icons of all apps
+     */
     public AppAdapter(ArrayList<String> apps, ArrayList<String> packages,
                       ArrayList<String> lockeds, ArrayList<Drawable> icons){
         appsNames = apps;
@@ -31,6 +43,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
         appsIcons = icons;
     }
 
+    /**
+     * This method is called when new holder is created
+     * @param parent - link to parent recyclerView
+     * @param viewType - ???
+     * @return ItemViewHolder inflated with details_layout.xml
+     */
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -43,8 +61,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
 
     }
 
+    /**
+     * Methods that binds holder (updates or just puts information)
+     * @param holder - holder
+     * @param position - position of holder in recyclerView
+     */
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
+        // get app name. package name, lock status
         boolean locked = false;
         String name = appsNames.get(position);
         String package_name = appsPackageNames.get(position);
@@ -52,33 +76,55 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
             locked = appsLocked.contains(package_name);
         Drawable icon = appsIcons.get(position);
 
+        // bind holder with given information
         holder.bind(name, package_name, locked, icon);
     }
 
+    /**
+     * @return length of recyclerView
+     */
     @Override
     public int getItemCount() {
         return appsNames.size();
     }
 
+    /**
+     * class that represents one holder in recyclerView
+     */
     class ItemViewHolder extends RecyclerView.ViewHolder{
 
+        // Init all elements of holder
         TextView appNameTextView;
         ImageView appIconImageView;
         CheckBox lockedCheckBox;
 
+        /**
+         * Constructor, just to assign elements of holder
+         * @param itemView - inflated view, where all info will be binded
+         */
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            // Assign those elements
             appNameTextView = itemView.findViewById(R.id.appNameTextView);
             appIconImageView = itemView.findViewById(R.id.appIconImageView);
             lockedCheckBox = itemView.findViewById(R.id.lockedCheckBox);
         }
 
+        /**
+         * Binds holder with given information
+         * @param appName - name of app
+         * @param packageName - name of package
+         * @param locked - status of app
+         * @param icon - icon of app
+         */
         void bind(String appName, final String packageName, boolean locked, Drawable icon){
+            // Set app name, package name and status
             appNameTextView.setText(appName);
             appIconImageView.setImageDrawable(icon);
             lockedCheckBox.setChecked(locked);
 
+            // Set on click listener: update app status
             lockedCheckBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -90,6 +136,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
             });
         }
     }
+
+    /**
+     * Locks or unlocks application
+     * @param locked - true/false
+     * @param package_name - name of package
+     */
     public void setLocked(boolean locked, String package_name){
         DataBase db = new DataBase(context);
 

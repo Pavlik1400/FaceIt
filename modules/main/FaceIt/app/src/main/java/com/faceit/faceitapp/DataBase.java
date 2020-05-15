@@ -1,3 +1,8 @@
+/**
+ * This class is data base that contains -
+ * 1) password, 2) information about profiles and blocked apps there
+ */
+
 package com.faceit.faceitapp;
 
 import android.content.ContentValues;
@@ -17,24 +22,23 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 public class DataBase extends SQLiteOpenHelper {
+    // Strings that are used for creating and accessing table
+    // with profiles and locked applications
     static final String TABLE_PROFILES = "profiles";
     static final String COLUMN_PROFILE_NAME = "name";
     static final String COLUMN_PROFILE_STATUS = "is_chosen";
     static final String COLUMN_LOCKED_APPS = "locked";
     static final String _ID = "_id";
 
-    static final String TABLE_ALL_APPS = "all_apps";
-    static final String COLUMN_APP_NAME = "name";
-    static final String COLUMN_PACKAGE_NAME = "package_name";
-
+    // Strings that are used for creating and accessing table with password
     static final String TABLE_PASSWORD = "password_table";
     static final String COLUMN_PASSWORD = "password";
 
-
-
+    // Additional information about data base
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "PROFILES.db";
 
+    // Initializing String for table with profiles
     private static final String SQL_CREATE_PROFILES =
             "CREATE TABLE " + TABLE_PROFILES + " (" +
                     _ID + " INTEGER PRIMARY KEY," +
@@ -42,49 +46,69 @@ public class DataBase extends SQLiteOpenHelper {
                     COLUMN_PROFILE_STATUS + " TEXT," +
                     COLUMN_LOCKED_APPS + " TEXT" + ")";
 
-    private static final String SQL_CREATE_APPS =
-            "CREATE TABLE " + TABLE_ALL_APPS + " (" +
-                    _ID + " INTEGER PRIMARY KEY," +
-                    COLUMN_APP_NAME + " TEXT," +
-                    COLUMN_PACKAGE_NAME + " TEXT" + ")";
-
+    // Initializing String for table with password
     private static final String SQL_CREATE_PASSWORD =
             "CREATE TABLE " + TABLE_PASSWORD + " (" +
                     _ID + " TEXT," +
                     COLUMN_PASSWORD + " TEXT" + ")";
 
+    // String for deleting for table with profiles
     private static final String SQL_DELETE_PROFILES =
             "DROP TABLE IF EXISTS " + TABLE_PROFILES;
 
-    private static final String SQL_DELETE_APPS =
-            "DROP TABLE IF EXISTS " + TABLE_ALL_APPS;
-
+    // String for deleting for table with password
     private static final String SQL_DELETE_PASSWORD =
             "DROP TABLE IF EXISTS " + TABLE_PASSWORD;
 
+    /**
+     * Just default constructor
+     * @param context - context of application
+     */
     public DataBase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
+    /**
+     * is called when data base is created. Creates three tables
+     * @param db - SQLite data base. SQLiteDatabase object that represents database itself
+     */
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_PROFILES);
-        db.execSQL(SQL_CREATE_APPS);
         db.execSQL(SQL_CREATE_PASSWORD);
     }
 
+    /**
+     * Called when db is upgraded (I never call this method)
+     * @param db - SQLiteDataBase that represents database itself
+     * @param oldVersion
+     * @param newVersion
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_PROFILES);
-        db.execSQL(SQL_DELETE_APPS);
         db.execSQL(SQL_DELETE_PASSWORD);
         onCreate(db);
     }
 
+    /**
+     * Called when db is downgraded (I never cal this method)
+     * @param db - SQLiteDataBase that represents database itself
+     * @param oldVersion
+     * @param newVersion
+     */
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
 
+    /**
+     * static method for encoding String using sha256
+     * @param text - String for encoding
+     * @return - String encoded with sha256 algorithm
+     * @throws NoSuchAlgorithmException MessageDigest class used for encoding
+     * requires this exception that is thrown if you input wrong algorithm. In this application
+     * it will never be thrown
+     */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     static private String encode(String text) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -92,66 +116,98 @@ public class DataBase extends SQLiteOpenHelper {
         return String.format("%0" + (hash.length*2) + "X", new BigInteger(1, hash));
     }
 
+    /**
+     * saves new password in the Data Base
+     * @param password - String password
+     * @throws NoSuchAlgorithmException MessageDigest class used for encoding
+     *      * requires this exception that is thrown if you input wrong algorithm. In this application
+     *      * it will never be thrown
+     */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     void setPassword(String password) throws NoSuchAlgorithmException {
-        // access to db
+        // access to data base
         SQLiteDatabase db = this.getWritableDatabase();
+
+        // Create value with new password
         ContentValues value = new ContentValues();
         value.put(DataBase.COLUMN_PASSWORD, encode(password));
 
+        // Cursor pointing at the password row
         Cursor passwordCursor = db.rawQuery("select * from " + DataBase.TABLE_PASSWORD,null);
 
+        // if there is a password in DB, than update
         if (passwordCursor.moveToNext()){
             String oldPassword = passwordCursor.getString(passwordCursor.getColumnIndex(DataBase.COLUMN_PASSWORD));
             db.update(DataBase.TABLE_PASSWORD, value,
                     DataBase.COLUMN_PASSWORD + " = ?", new String[] {oldPassword});
         }
+        // if there is no password then insert
         else {
-            // if there is no password then insert
-            Log.d("ISNERTEDPASSWORD", encode(password));
             db.insert(DataBase.TABLE_PASSWORD, null, value);
         }
 
     }
 
+    /**
+     * @return true if there is password in db else false
+     */
     boolean hasPassword(){
         // access to db
         SQLiteDatabase db = this.getWritableDatabase();
+        // Cursor pointing at row.
         Cursor passwordCursor = db.rawQuery("select * from " + DataBase.TABLE_PASSWORD,null);
         return passwordCursor.moveToNext();
     }
 
+    /**
+     * Check whether password if correct
+     * @param password
+     * @return True if <password> == password in db
+     * @throws NoSuchAlgorithmException MessageDigest class used for encoding
+     * requires this exception that is thrown if you input wrong algorithm. In this application
+     * it will never be thrown
+     */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     boolean checkPassword(String password) throws NoSuchAlgorithmException {
+        // Access to db
         SQLiteDatabase db = this.getWritableDatabase();
-
+        // encode inputed password
         String encodedPassword = encode(password);
 
+        // cursor pointing at password
         Cursor passwordCursor = db.rawQuery("select * from " + DataBase.TABLE_PASSWORD,null);
         passwordCursor.moveToNext();
+        // get password
         String actualHashedPassword = passwordCursor.getString(passwordCursor.getColumnIndex(DataBase.COLUMN_PASSWORD));
+        passwordCursor.close();
         return actualHashedPassword.equals(encodedPassword);
     }
 
+    /**
+     * Created new profile in the DB
+     * @param profileName - name of profile
+     * @param status - true if new profile will be chosen else false
+     */
     void createNewProfile(String profileName, String status){
-        // Creates new empty profile with name [profileName].
-
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // create new row with given name, it is selected by default, no locked apps
+        // create new row with given name with no locked apps
         ContentValues values = new ContentValues();
         values.put(DataBase.COLUMN_PROFILE_NAME, profileName);
         values.put(DataBase.COLUMN_PROFILE_STATUS, status);
         values.put(DataBase.COLUMN_LOCKED_APPS, "");
 
+        // insert profile
         db.insert(DataBase.TABLE_PROFILES, null, values);
 
     }
 
+    /**
+     * Deleted profile with given name
+     * @param profileName - name of profile
+     */
     void deleteProfile(String profileName){
-        // Creates new empty profile with name [profileName].
-
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -159,18 +215,24 @@ public class DataBase extends SQLiteOpenHelper {
                   new String[] {profileName});
     }
 
+    /**
+     * @return true if there is at least one profile
+     */
     boolean hasProfile(){
-        // Returns true if there is at least one profile
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
-
+        // cursor pointing at all profiles
         Cursor searchCursor = db.rawQuery("select * from " + DataBase.TABLE_PROFILES,null);
 
         return searchCursor.moveToNext();
     }
 
+    /**
+     * Adds app with given package name to given profile
+     * @param profileName - name of profile
+     * @param package_name - package name of application
+     */
     void setLocked(String profileName, String package_name){
-        // Adds app with given package name to given profile
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -180,13 +242,12 @@ public class DataBase extends SQLiteOpenHelper {
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName},
                 null, null, null);
         lockedAppCursor.moveToNext();
-
         String locked_apps = lockedAppCursor.getString(lockedAppCursor.getColumnIndex(DataBase.COLUMN_LOCKED_APPS));
 
         // Change list of locked applications
         locked_apps += package_name + ",";
 
-        // update value of locked apps
+        // update value of locked apps in data base
         ContentValues new_locked = new ContentValues();
         new_locked.put(DataBase.COLUMN_LOCKED_APPS, locked_apps);
 
@@ -194,6 +255,11 @@ public class DataBase extends SQLiteOpenHelper {
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName});
     }
 
+    /**
+     * Deletes app from locked list in given profile
+     * @param profileName - name of profile
+     * @param packageName - package name of app
+     */
     void unsetLocked(String profileName, String packageName){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
@@ -204,8 +270,9 @@ public class DataBase extends SQLiteOpenHelper {
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName},
                 null, null, null);
         lockedAppsCursor.moveToNext();
-        // delete given app
         String locked_apps = lockedAppsCursor.getString(lockedAppsCursor.getColumnIndex(DataBase.COLUMN_LOCKED_APPS));
+
+        // delete app
         String new_locked_apps = locked_apps.replaceAll(packageName + ",", "");
 
         // update value
@@ -215,6 +282,12 @@ public class DataBase extends SQLiteOpenHelper {
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName});
     }
 
+    /**
+     * Returns true if app is locked in given profile
+     * @param profileName - name of profile
+     * @param packageName - package name of application for checking
+     * @return true/false
+     */
     boolean isLocked(String profileName, String packageName){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
@@ -225,28 +298,35 @@ public class DataBase extends SQLiteOpenHelper {
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName},
                 null, null, null);
         lockedAppsCursor.moveToNext();
-
         String locked_apps = lockedAppsCursor.getString(lockedAppsCursor.getColumnIndex(DataBase.COLUMN_LOCKED_APPS));
 
+        // return is this String contains given app
         return locked_apps.contains(packageName);
 
     }
 
+    /**
+     * Returns list of all locked apps of given profile
+     * @param profileName - name of profile
+     * @return ArrayList oof package names
+     */
     ArrayList<String> getAllLocked(String profileName){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // get old list of locked apps
+        // get list of locked apps in String
         Cursor lockedAppsCursor = db.query(
                 DataBase.TABLE_PROFILES, null,
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName},
                 null, null, null);
         lockedAppsCursor.moveToNext();
-        // delete given app
         String locked_apps = lockedAppsCursor.getString(lockedAppsCursor.getColumnIndex(DataBase.COLUMN_LOCKED_APPS));
         ArrayList<String> res = new ArrayList<>();
+
+        // convert to String[]
         String[] locked_apps_arr = locked_apps.split(",");
 
+        // Convert to ArrayList
         for (String app: locked_apps_arr){
             if (!app.equals("")){
                 res.add(app);
@@ -255,37 +335,49 @@ public class DataBase extends SQLiteOpenHelper {
         return res;
     }
 
+    /**
+     * @return name of chosen profile
+     */
     String getChosenProfile(){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Cursor that allow to iterate through all proofiles
+        // Cursor that allow to iterate through all profiles
         Cursor allProfiles = db.rawQuery("select * from " + DataBase.TABLE_PROFILES,null);
 
         while (allProfiles.moveToNext()){
+            // get name
             String profileName = allProfiles.getString(allProfiles.getColumnIndex(DataBase.COLUMN_PROFILE_NAME));
             String isChosen = allProfiles.getString(allProfiles.getColumnIndex(DataBase.COLUMN_PROFILE_STATUS));
             if (isChosen.equals("true")){
                 return profileName;
             }
         }
-        return "ERROR";
+        return "ERROR"; // nvere happens
     }
 
+    /**
+     * @return ArrayList of names of all profiles
+     */
     ArrayList<String> getAllProfiles(){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
 
         ArrayList<String> res = new ArrayList<>();
-        // get all installed apps
+        // get all profiles
         Cursor allProfiles = db.rawQuery("select * from " + DataBase.TABLE_PROFILES,null);
 
+        // add all of then to result
         while(allProfiles.moveToNext()){
             res.add(allProfiles.getString(allProfiles.getColumnIndex(DataBase.COLUMN_PROFILE_NAME)));
         }
         return res;
     }
 
+    /**
+     * Set given profile as chosen (automatically unsets old one)
+     * @param profileName - name of profile
+     */
     void setChosenProfile(String profileName){
         // access to database
         SQLiteDatabase db = this.getWritableDatabase();
@@ -299,50 +391,10 @@ public class DataBase extends SQLiteOpenHelper {
         db.update(DataBase.TABLE_PROFILES, unsetterChosenProfile,
                   DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {oldProfile});
 
+        // Set given profile
         ContentValues setterChosenProfile = new ContentValues();
         setterChosenProfile.put(DataBase.COLUMN_PROFILE_STATUS, "true");
         db.update(DataBase.TABLE_PROFILES, setterChosenProfile,
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName});
-    }
-
-    ArrayList<String> getAllApps(){
-        // Returns all apps apps in ArrayList. Each element has `name,package_name` format
-        // Access database
-        SQLiteDatabase db = this.getWritableDatabase();
-        ArrayList<String> res = new ArrayList<>();
-
-        // get all installed apps
-        Cursor allApps = db.rawQuery("select * from " + DataBase.TABLE_ALL_APPS,null);
-
-        while (allApps.moveToNext()){
-            String name = allApps.getString(allApps.getColumnIndex(DataBase.COLUMN_APP_NAME));
-            String package_name = allApps.getString(allApps.getColumnIndex(DataBase.COLUMN_PACKAGE_NAME));
-            res.add(name + "," + package_name);
-        }
-        return res;
-    }
-
-    void addApp(String name, String package_name){
-        // Access database
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        //save data
-        ContentValues value = new ContentValues();
-        value.put(DataBase.COLUMN_APP_NAME, name);
-        value.put(DataBase.COLUMN_PACKAGE_NAME, package_name);
-        db.insert(DataBase.TABLE_ALL_APPS, null, value);
-    }
-
-    boolean containsApp(String package_name){
-        // Access database
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        // get current list of locked apps
-        Cursor searchCursor = db.query(
-                DataBase.TABLE_ALL_APPS, null,
-                DataBase.COLUMN_PACKAGE_NAME + " = ?", new String[] {package_name},
-                null, null, null);
-
-        return searchCursor.moveToNext();
     }
 }

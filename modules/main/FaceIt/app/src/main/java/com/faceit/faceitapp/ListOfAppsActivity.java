@@ -1,3 +1,10 @@
+/**
+ * Class that represents activity with all apps
+ * List is made with recyclerView. This activity
+ * Finds information about all installed apps and puts it in the
+ * recyclerView with adapter `AppAdapter`
+ */
+
 package com.faceit.faceitapp;
 
 import android.content.Intent;
@@ -5,23 +12,23 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ListOfAppsActivity extends AppCompatActivity {
 
+    // names, package names, statuses and icons are kept in different containers
     private ArrayList<String> appsNames = new ArrayList<>();
     private ArrayList<String> appsPackageNames = new ArrayList<>();
     private ArrayList<String> appsLocked = new ArrayList<>();
     private ArrayList<Drawable> appsIcons = new ArrayList<>();
 
+    // init main recyclerView
     private RecyclerView appsRecyclerView;
 
     @Override
@@ -29,12 +36,13 @@ public class ListOfAppsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        // assign recyclerView and set linear layout manager
         appsRecyclerView = findViewById(R.id.appsRecyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         appsRecyclerView.setLayoutManager(layoutManager);
 
-        // Create hash map package_name - icon
-        HashMap<String, Drawable> icons = new HashMap<>();
+        // This huge block of code finds all installed apps,
+        // Filters them and saves in the containers inited above
         final PackageManager packageManager = getApplicationContext().getPackageManager();
         final List<PackageInfo> allInstalledPackages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
         for(PackageInfo p : allInstalledPackages) {
@@ -49,35 +57,22 @@ public class ListOfAppsActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             if(applicationIcon != null && !packageManager.getDefaultActivityIcon().equals(applicationIcon) && !getApplicationContext().getPackageName().equals(p.packageName)) {
-                String package_name = p.packageName;
-                icons.put(package_name, applicationIcon);
-                Log.d("apps", package_name);
+                appsNames.add(p.applicationInfo.loadLabel(getPackageManager()).toString());
+                appsPackageNames.add(p.packageName);
+                appsIcons.add(applicationIcon);
             }
         }
 
+        // Get list of locked apps from db
         DataBase db = new DataBase(getApplicationContext());
-
         appsLocked = db.getAllLocked(db.getChosenProfile());
-
-        ArrayList<String> allApps = db.getAllApps();
-        for (String app: allApps){
-            String[] app_arr = app.split(",");
-
-            String name = app_arr[0];
-            String package_name = app_arr[1];
-            Drawable icon = icons.get(package_name);
-
-            appsNames.add(name);
-            appsPackageNames.add(package_name);
-            appsIcons.add(icon);
-        }
-
         db.close();
 
+        // set adapter
         AppAdapter adapter = new AppAdapter(appsNames, appsPackageNames, appsLocked, appsIcons);
-
         appsRecyclerView.setAdapter(adapter);
 
+        // hide loading bar
         FaceRecognitionAppActivity.ShowHideProgressBar(0);
 
     }
