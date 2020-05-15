@@ -82,7 +82,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private boolean useEigenfaces = true;
     private float faceThreshold, distanceThreshold;
     private SharedPreferences prefs;
-    private TinyDB tinydb;
+    private UsersDataBase usersDB;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private int unique_photo_num_left = 0;
@@ -270,7 +270,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
+        usersDB = new UsersDataBase(getApplicationContext()); // Used to store ArrayLists in the shared preferences
 
         // Limit constants
         faceThreshold = (float) 0.05; // Used for differentiating faces with each other
@@ -385,8 +385,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                             showToast("User added: " + imagesLabels.get(minIndex), Toast.LENGTH_SHORT);
                             addLabel(imagesLabels.get(minIndex));
                             trainFaces();
-                            tinydb.putListMat("images", images);
-                            tinydb.putListString("imagesLabels", imagesLabels);
+                            usersDB.putImages(images);
+                            usersDB.putLabels(imagesLabels);
                             finish();
                         }else {
                             showToast("Please, more more photos from different edge", Toast.LENGTH_SHORT);
@@ -450,8 +450,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
 
         // Store ArrayLists containing the images and labels
         if (images != null && imagesLabels != null) {
-            tinydb.putListMat("images", images);
-            tinydb.putListString("imagesLabels", imagesLabels);
+            usersDB.putImages(images);
+            usersDB.putLabels(imagesLabels);
         }
     }
 
@@ -479,8 +479,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                     mOpenCvCameraView.enableView();
 
                     // Read images and labels from shared preferences
-                    images = tinydb.getListMat("images");
-                    imagesLabels = tinydb.getListString("imagesLabels");
+                    images = usersDB.getImages();
+                    imagesLabels = usersDB.getLabels();
 
                     Log.i(TAG, "Number of images: " + images.size()  + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {

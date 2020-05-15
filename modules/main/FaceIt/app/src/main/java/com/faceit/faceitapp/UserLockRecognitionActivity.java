@@ -78,7 +78,7 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
     private float faceThreshold, distanceThreshold;
     private int maximumImages;
     private SharedPreferences prefs;
-    private TinyDB tinydb;
+    private UsersDataBase usersDB;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private final int delay_photo_take = 500;
@@ -272,7 +272,7 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         // Set radio button based on value stored in shared preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        tinydb = new TinyDB(this); // Used to store ArrayLists in the shared preferences
+        usersDB = new UsersDataBase(getApplicationContext());
         faceThreshold = (float) 0.05; // Get initial value
         distanceThreshold = (float) 0.05; // Get initial value
         maximumImages = 50; // Get initial value
@@ -429,8 +429,8 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                     mOpenCvCameraView.enableView();
 
                     // Read images and labels from shared preferences
-                    images = tinydb.getListMat("images");
-                    imagesLabels = tinydb.getListString("imagesLabels");
+                    images = usersDB.getImages();
+                    imagesLabels = usersDB.getLabels();
 
                     Log.i(TAG, "Number of images: " + images.size()  + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {
