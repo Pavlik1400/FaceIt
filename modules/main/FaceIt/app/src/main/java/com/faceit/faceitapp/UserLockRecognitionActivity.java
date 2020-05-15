@@ -1,21 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2016 Kristian Sloth Lauszus. All rights reserved.
- *
- * This software may be distributed and modified under the terms of the GNU
- * General Public License version 2 (GPL2) as published by the Free Software
- * Foundation and appearing in the file GPL2.TXT included in the packaging of
- * this file. Please note that GPL2 Section 2[b] requires that all works based
- * on this software must also be made publicly available under the terms of
- * the GPL2 ("Copyleft").
- *
- * Contact information
- * -------------------
- *
- * Kristian Sloth Lauszus
- * Web      :  http://www.lauszus.com
- * e-mail   :  lauszus@gmail.com
- ******************************************************************************/
-
 /*
  Copyright (C) 2020  PVY Soft. All rights reserved.
 
@@ -36,6 +18,10 @@
  PVY Soft
  email: pvysoft@gmail.com
 */
+
+/*
+* Code sourse (by Lauszus, GNU GPL v2.0 License): https://github.com/Lauszus/FaceRecognitionApp
+* */
 
 package com.faceit.faceitapp;
 
@@ -86,6 +72,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Locale;
 
+/**
+ * Activity for user`s face biometric recognise
+ */
 public class UserLockRecognitionActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CODE = 0;
@@ -147,6 +136,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         return true;
     }
 
+    /**
+     * Shows AlertDialog to enter password
+     */
     private void showEnterPasswordDialog() {
         handler.removeCallbacksAndMessages(null);
 
@@ -209,6 +201,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         dialog.show();
     }
 
+    /**
+     * Listen to callback from training algorithm
+     */
     private NativeMethods.TrainFacesTask.Callback trainFacesTaskCallback = new NativeMethods.TrainFacesTask.Callback() {
         @Override
         public void onTrainFacesComplete(boolean result) {
@@ -219,17 +214,17 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     };
 
+    /**
+     * Method that takes photo and starts recognition
+     */
     public void recognise(){
         {
-
             if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
                 Log.i(TAG, "mMeasureDistTask is still running");
-                //showToast("Still processing old image...", Toast.LENGTH_SHORT);
                 return;
             }
             if (mTrainFacesTask != null && mTrainFacesTask.getStatus() != AsyncTask.Status.FINISHED) {
                 Log.i(TAG, "mTrainFacesTask is still running");
-                //showToast("Still training...", Toast.LENGTH_SHORT);
                 return;
             }
 
@@ -249,15 +244,12 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
 
             if (!images.isEmpty()){
                 if (image.height() != images.get(0).height()){
-                    //showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
                     return;
                 }
                 if (image.width() != images.get(0).width()){
-                    //showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
                     return;
                 }
                 if (image.total() != images.get(0).total()){
-                    //showToast("Size ERROR!!!", Toast.LENGTH_SHORT);
                     return;
                 }
             }
@@ -268,6 +260,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     }
 
+    /**
+     * Method for starting recognition each 0.5 seconds
+     */
     public void scheduleRecognition() {
         handler.postDelayed(new Runnable() {
             public void run() {
@@ -277,6 +272,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }, delay_photo_take);
     }
 
+    /**
+     * Method that starts when activity is created (main activity method)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -305,9 +303,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
             }
         });
 
-        /*
-        * Flip camera animation on double tap
-        * */
+        /**
+         * Flip camera animation on double tap
+         */
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
@@ -340,9 +338,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }, 1000);   //1 second
     }
 
-    /*
-    * Callback from user in database search.
-    * */
+    /**
+     * Callback from user in database search.
+     */
     private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
         @Override
         public void onMeasureDistComplete(Bundle bundle) {
@@ -358,9 +356,6 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                 if (imagesLabels.size() > minIndex) { // Just to be sure
                     Log.i(TAG, "dist[" + minIndex + "]: " + minDist + ", face dist: " + faceDist + ", label: " + imagesLabels.get(minIndex));
 
-                    String minDistString = String.format(Locale.US, "%.4f", minDist);
-                    String faceDistString = String.format(Locale.US, "%.4f", faceDist);
-
                     if (faceDist < faceThreshold && minDist < distanceThreshold) { // 1. Near face space and near a face class
                         showToast("Recognised: " + imagesLabels.get(minIndex), Toast.LENGTH_LONG);
                         if (mOpenCvCameraView != null)
@@ -368,19 +363,6 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                         handler.removeCallbacksAndMessages(null);
                         finish();
                     }
-                    else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class
-                        //showToast("Unknown face", Toast.LENGTH_LONG);
-                    }
-                    else if (minDist < distanceThreshold) { // 3. Distant from face space and near a face class
-                        //showToast("False recognition", Toast.LENGTH_LONG);
-                        //images.remove(images.size() - 1); // Remove last image
-                    }
-                    else { // 4. Distant from face space and not near a known face class.
-                        //showToast("Image is not a face", Toast.LENGTH_LONG);
-                        //images.remove(images.size() - 1); // Remove last image
-                    }
-                } else {
-                    //showToast("everything is wrong", Toast.LENGTH_LONG);
                 }
             } else {
                 Log.w(TAG, "Array is null");
@@ -392,9 +374,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     };
 
-    /*
+    /**
      * Permission checker
-     * */
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -409,6 +391,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     }
 
+    /**
+     * Method that starts when activity stops by pressing Home button
+     */
     @Override
     public void onPause() {
         super.onPause();
@@ -416,16 +401,25 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
             mOpenCvCameraView.disableView();
     }
 
+    /**
+     * Method that starts when activity is started
+     */
     @Override
     public void onStart() {
         super.onStart();
     }
 
+    /**
+     * Method that starts when activity is normally stopped
+     */
     @Override
     public void onStop() {
         super.onStop();
     }
 
+    /**
+     * Method that starts when activity is resumed from pause
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -437,9 +431,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
             loadOpenCV();
     }
 
-    /*
+    /**
      * Loads Native (C++) libs and database of images and username labels
-     * */
+     */
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -468,9 +462,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     };
 
-    /*
+    /**
      * Loads OpenCV
-     * */
+     */
     private void loadOpenCV() {
         if (!OpenCVLoader.initDebug(true)) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
@@ -481,6 +475,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         }
     }
 
+    /**
+     * Method that starts when activity is destroyed
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -488,25 +485,25 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
             mOpenCvCameraView.disableView();
     }
 
-    /*
+    /**
      * RGB and Grayscale vectors for photo processing creation
-     * */
+     */
     public void onCameraViewStarted(int width, int height) {
         mGray = new Mat();
         mRgba = new Mat();
     }
 
-    /*
+    /**
      * RGB and Grayscale vectors for photo processing creation
-     * */
+     */
     public void onCameraViewStopped() {
         mGray.release();
         mRgba.release();
     }
 
-    /*
+    /**
      * Takes and preprocess photo
-     * */
+     */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat mGrayTmp = inputFrame.gray();
         Mat mRgbaTmp = inputFrame.rgba();
@@ -561,14 +558,17 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         return mRgba;
     }
 
+    /**
+     * Thos method protect activity from back pressing
+     */
     @Override
     public void onBackPressed() {
 
     }
 
-    /*
+    /**
      * Menu for camera icon
-     * */
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_face_recognition_app, menu);
@@ -581,9 +581,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         return true;
     }
 
-    /*
+    /**
      * Camera flip animation
-     * */
+     */
     private void flipCameraAnimation() {
         // Flip the camera
         mOpenCvCameraView.flipCamera();
@@ -616,9 +616,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         animator.start();
     }
 
-    /*
+    /**
      * Camera flip by pressing camera icon
-     * */
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

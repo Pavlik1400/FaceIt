@@ -1,21 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2016 Kristian Sloth Lauszus. All rights reserved.
- *
- * This software may be distributed and modified under the terms of the GNU
- * General Public License version 2 (GPL2) as published by the Free Software
- * Foundation and appearing in the file GPL2.TXT included in the packaging of
- * this file. Please note that GPL2 Section 2[b] requires that all works based
- * on this software must also be made publicly available under the terms of
- * the GPL2 ("Copyleft").
- *
- * Contact information
- * -------------------
- *
- * Kristian Sloth Lauszus
- * Web      :  http://www.lauszus.com
- * e-mail   :  lauszus@gmail.com
- ******************************************************************************/
-
 /*
  Copyright (C) 2020  PVY Soft. All rights reserved.
 
@@ -37,6 +19,10 @@
  email: pvysoft@gmail.com
 */
 
+/*
+ * Code sourse (by Lauszus, GNU GPL v2.0 License): https://github.com/Lauszus/FaceRecognitionApp
+ * */
+
 package com.faceit.faceitapp;
 
 import android.os.AsyncTask;
@@ -45,6 +31,9 @@ import android.util.Log;
 
 import org.opencv.core.Mat;
 
+/**
+ * This is class for using native C++ face recognition algorithms
+ */
 // All computations is done in an asynchronous task, so we do not skip any frames
 class NativeMethods {
     private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName() + "/" + NativeMethods.class.getSimpleName();
@@ -53,11 +42,17 @@ class NativeMethods {
         System.loadLibrary("face-lib");
     }
 
+    /**
+     * Class for training recognition algorithms in AsyncTask
+     */
     static class TrainFacesTask extends AsyncTask<Void, Void, Boolean> {
         private final Mat images, classes;
         private final Callback callback;
         private Exception error;
 
+        /**
+         * Receives callback from TrainFacesTask when it is done
+         */
         interface Callback {
             void onTrainFacesComplete(boolean result);
         }
@@ -81,7 +76,7 @@ class NativeMethods {
             this.callback = callback;
         }
 
-        /*
+        /**
         * Starts task of training from image database
         * */
         @Override
@@ -98,7 +93,7 @@ class NativeMethods {
             }
         }
 
-        /*
+        /**
         * Callback of training
         * */
         @Override
@@ -111,9 +106,9 @@ class NativeMethods {
         }
     }
 
-    /*
-    * Class for processing and recognising images
-    * */
+    /**
+    * Class for processing and recognising images in AsyncTask
+    */
     static class MeasureDistTask extends AsyncTask<Mat, Void, Bundle> {
         static final String MIN_DIST_FLOAT = "minDist";
         static final String MIN_DIST_INDEX_INT = "minDistIndex";
@@ -123,6 +118,9 @@ class NativeMethods {
         private final boolean useEigenfaces;
         private Exception error;
 
+        /**
+         * Receives callback from MeasureDistTask when it is done
+         */
         interface Callback {
             void onMeasureDistComplete(Bundle bundle);
         }
@@ -132,7 +130,7 @@ class NativeMethods {
             this.callback = callback;
         }
 
-        /*
+        /**
         * Starts task of photo recognition
         * */
         @Override

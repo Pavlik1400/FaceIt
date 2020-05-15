@@ -1,21 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2016 Kristian Sloth Lauszus. All rights reserved.
- *
- * This software may be distributed and modified under the terms of the GNU
- * General Public License version 2 (GPL2) as published by the Free Software
- * Foundation and appearing in the file GPL2.TXT included in the packaging of
- * this file. Please note that GPL2 Section 2[b] requires that all works based
- * on this software must also be made publicly available under the terms of
- * the GPL2 ("Copyleft").
- *
- * Contact information
- * -------------------
- *
- * Kristian Sloth Lauszus
- * Web      :  http://www.lauszus.com
- * e-mail   :  lauszus@gmail.com
- ******************************************************************************/
-
 /*
  Copyright (C) 2020  PVY Soft. All rights reserved.
 
@@ -36,6 +18,10 @@
  PVY Soft
  email: pvysoft@gmail.com
 */
+
+/*
+ * Code sourse (by Lauszus, GNU GPL v2.0 License): https://github.com/Lauszus/FaceRecognitionApp
+ * */
 
 package com.faceit.faceitapp;
 
@@ -90,6 +76,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Activity for user`s face biometric add
+ */
 public class AddUserActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG = FaceRecognitionAppActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_CODE = 0;
@@ -107,11 +96,11 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private int unique_photo_num_left = 0;
 
-    /*
-    * Show small messages to user
-    * @param message - string message yuo want to show
-    * @param duration - duration of message
-    * */
+    /**
+     * Show small messages to user
+     * @param message - string message yuo want to show
+     * @param duration - duration of message
+     */
     private void showToast(String message, int duration) {
         if (duration != Toast.LENGTH_SHORT && duration != Toast.LENGTH_LONG)
             throw new IllegalArgumentException();
@@ -121,10 +110,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         mToast.show();
     }
 
-    /*
-    * Ads a name label related to the last photo taken
-    * @param string - name of user
-    * */
+    /**
+     * Ads a name label related to the last photo taken
+     * @param string - name of user
+     */
     private void addLabel(String string) {
         String label = string.substring(0, 1).toUpperCase(Locale.US) + string.substring(1).trim().toLowerCase(Locale.US); // Make sure that the name is always uppercase and rest is lowercase
         imagesLabels.add(label); // Add label to list of labels
@@ -161,9 +150,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         return true;
     }
 
-    /*
-    * Checks the callback from training algorithm and shows message result
-    * */
+    /**
+     * Checks the callback from training algorithm and shows message result
+     */
     private NativeMethods.TrainFacesTask.Callback trainFacesTaskCallback = new NativeMethods.TrainFacesTask.Callback() {
         @Override
         public void onTrainFacesComplete(boolean result) {
@@ -174,10 +163,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
-    /*
-    * Shows dialog where user can add new labels or
-    * use existing to set a connection between users and photos
-    * */
+    /**
+     * Shows dialog where user can add new labels or
+     * use existing to set a connection between users and photos
+     */
     private void showLabelsDialog() {
         Set<String> uniqueLabelsSet = new HashSet<>(imagesLabels); // Get all unique labels
         if (!uniqueLabelsSet.isEmpty()) { // Make sure that there are any labels
@@ -230,9 +219,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             showEnterLabelDialog(); // If there is no existing labels, then ask the user for a new label
     }
 
-    /*
-    * Shows dialog of creating new label
-    * */
+    /**
+     * Shows dialog of creating new label
+     */
     private void showEnterLabelDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(AddUserActivity.this);
         builder.setTitle("Please enter your name:");
@@ -277,6 +266,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         dialog.show();
     }
 
+    /**
+     * Method that starts when activity is created (main activity method)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -299,9 +291,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
             NativeMethods.MeasureDistTask mMeasureDistTask;
 
-            /*
-            * Method that starts "Take photo" button
-            * */
+            /**
+             * Method that starts "Take photo" button
+             */
             @Override
             public void onClick(View v) {
                 if (mMeasureDistTask != null && mMeasureDistTask.getStatus() != AsyncTask.Status.FINISHED) {
@@ -354,9 +346,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             }
         });
 
-        /*
+        /**
          * Flip camera animation on double tap
-         * */
+         */
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
@@ -382,9 +374,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         });
     }
 
-    /*
+    /**
      * Callback from user in database search.
-     * */
+     */
     private NativeMethods.MeasureDistTask.Callback measureDistTaskCallback = new NativeMethods.MeasureDistTask.Callback() {
         @Override
         public void onMeasureDistComplete(Bundle bundle) {
@@ -414,18 +406,16 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                         }
                     }
                     else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class
-                        showToast("Face added", Toast.LENGTH_SHORT);
+                        showToast("Face added, please, continue", Toast.LENGTH_SHORT);
                         unique_photo_num_left = unique_photo_num_left - 1;
                     }
                     else if (minDist < distanceThreshold) { // 3. Distant from face space and near a face class
-                        showToast("Face added.1", Toast.LENGTH_SHORT);
+                        showToast("Face added, please, continue", Toast.LENGTH_SHORT);
                         unique_photo_num_left = unique_photo_num_left - 1;
                     }
                     else { // 4. Distant from face space and not near a known face class.
                         showToast("Take more photos!!", Toast.LENGTH_SHORT);
                     }
-                } else {
-                    showToast("everything is wrong", Toast.LENGTH_SHORT);
                 }
             } else {
                 Log.w(TAG, "Array is null");
@@ -435,9 +425,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
-    /*
-    * Permission checker
-    * */
+    /**
+     * Permission checker
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -452,6 +442,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     }
 
+    /**
+     * Method that starts when activity stops by pressing Home button
+     */
     @Override
     public void onPause() {
         super.onPause();
@@ -459,11 +452,17 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             mOpenCvCameraView.disableView();
     }
 
+    /**
+     * Method that starts when activity is started
+     */
     @Override
     public void onStart() {
         super.onStart();
     }
 
+    /**
+     * Method that starts when activity is normally stopped
+     */
     @Override
     public void onStop() {
         super.onStop();
@@ -475,6 +474,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     }
 
+    /**
+     * Method that starts when activity is resumed from pause
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -486,9 +488,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             loadOpenCV();
     }
 
-    /*
-    * Loads Native (C++) libs and database of images and username labels
-    * */
+    /**
+     * Loads Native (C++) libs and database of images and username labels
+     */
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -517,9 +519,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     };
 
-    /*
-    * Loads OpenCV
-    * */
+    /**
+     * Loads OpenCV
+     */
     private void loadOpenCV() {
         if (!OpenCVLoader.initDebug(true)) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
@@ -530,6 +532,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         }
     }
 
+    /**
+     * Method that starts when activity is destroyed
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -537,25 +542,25 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             mOpenCvCameraView.disableView();
     }
 
-    /*
-    * RGB and Grayscale vectors for photo processing creation
-    * */
+    /**
+     * RGB and Grayscale vectors for photo processing creation
+     */
     public void onCameraViewStarted(int width, int height) {
         mGray = new Mat();
         mRgba = new Mat();
     }
 
-    /*
+    /**
      * RGB and Grayscale vectors for photo processing release
-     * */
+     */
     public void onCameraViewStopped() {
         mGray.release();
         mRgba.release();
     }
 
-    /*
-    * Takes and preprocess photo
-    * */
+    /**
+     * Takes and preprocess photo
+     */
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat mGrayTmp = inputFrame.gray();
         Mat mRgbaTmp = inputFrame.rgba();
@@ -610,6 +615,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         return mRgba;
     }
 
+    /**
+     * Method that starts when back button is pressed
+     */
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -619,9 +627,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
             super.onBackPressed();
     }
 
-    /*
-    * Menu for camera icon
-    * */
+    /**
+     * Menu for camera icon
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_face_recognition_app, menu);
@@ -634,9 +642,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         return true;
     }
 
-    /*
-    * Camera flip animation
-    * */
+    /**
+     * Camera flip animation
+     */
     private void flipCameraAnimation() {
         // Flip the camera
         mOpenCvCameraView.flipCamera();
@@ -669,9 +677,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         animator.start();
     }
 
-    /*
-    * Camera flip by pressing camera icon
-    * */
+    /**
+     * Camera flip by pressing camera icon
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

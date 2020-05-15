@@ -1,22 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2016 Kristian Sloth Lauszus. All rights reserved.
- *
- * This software may be distributed and modified under the terms of the GNU
- * General Public License version 2 (GPL2) as published by the Free Software
- * Foundation and appearing in the file GPL2.TXT included in the packaging of
- * this file. Please note that GPL2 Section 2[b] requires that all works based
- * on this software must also be made publicly available under the terms of
- * the GPL2 ("Copyleft").
- *
- * Contact information
- * -------------------
- *
- * Kristian Sloth Lauszus
- * Web      :  http://www.lauszus.com
- * e-mail   :  lauszus@gmail.com
- ******************************************************************************/
-// Based on: http://stackoverflow.com/questions/14816166/rotate-camera-preview-to-portrait-android-opencv-camera/38210157#38210157
-
 /*
  Copyright (C) 2020  PVY Soft. All rights reserved.
 
@@ -37,6 +18,10 @@
  PVY Soft
  email: pvysoft@gmail.com
 */
+
+/*
+ * Code sourse (by Lauszus, GNU GPL v2.0 License): https://github.com/Lauszus/FaceRecognitionApp
+ * */
 
 package com.faceit.faceitapp;
 
@@ -158,6 +143,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         this.mCameraIndex = cameraIndex;
     }
 
+    /**
+     * Listener of OpenCV camera
+     */
     public interface CvCameraViewListener {
         /**
          * This method is invoked when camera preview has started. After this method is invoked
@@ -181,6 +169,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         public Mat onCameraFrame(Mat inputFrame);
     }
 
+    /**
+     * Listener of OpenCV camera
+     */
     public interface CvCameraViewListener2 {
         /**
          * This method is invoked when camera preview has started. After this method is invoked
@@ -325,7 +316,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     }
 
     /**
-     *
+     * Sets listener of OpenCV camera
      * @param listener - set the CvCameraViewListener2
      */
     public void setCvCameraViewListener(CvCameraViewListener2 listener) {
@@ -726,6 +717,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         mCacheBitmap = Bitmap.createBitmap(mFrameWidth, mFrameHeight, Bitmap.Config.ARGB_8888);
     }
 
+    /**
+     * Interface for getWidth and getHeight methods
+     */
     public interface ListItemAccessor {
         public int getWidth(Object obj);
         public int getHeight(Object obj);
