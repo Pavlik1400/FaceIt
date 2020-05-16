@@ -19,13 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/**
- * Class that represents activity with all apps
- * List is made with recyclerView. This activity
- * Finds information about all installed apps and puts it in the
- * recyclerView with adapter `AppAdapter`
- */
-
 package com.faceit.faceitapp;
 
 import android.content.Intent;
@@ -41,6 +34,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that represents activity with all apps
+ * List is made with recyclerView. This activity
+ * Finds information about all installed apps and puts it in the
+ * recyclerView with adapter `AppAdapter`
+ */
 public class ListOfAppsActivity extends AppCompatActivity {
 
     // names, package names, statuses and icons are kept in different containers

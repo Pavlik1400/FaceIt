@@ -19,10 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/**
- * This is class with main activity. Loads all buttons, sets onClickListeners to them, etc
- */
-
 package com.faceit.faceitapp;
 
 
@@ -47,6 +43,9 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is class with main activity. Loads all buttons, sets onClickListeners to them, etc
+ */
 public class FaceRecognitionAppActivity extends AppCompatActivity {
 
     // Init loading progress bar

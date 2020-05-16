@@ -19,10 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/**
- * This class represents activity with profiles. main element of its layout - recyclerView
- * that uses ProfileItemAdapter as adapter.
- */
 package com.faceit.faceitapp;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +34,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
+/**
+ * This class represents activity with profiles. main element of its layout - recyclerView
+ * that uses ProfileItemAdapter as adapter.
+ */
 public class ProfilesActivity extends AppCompatActivity {
     // Init recyclerView, addButton and editText for typing name of new profile
     private RecyclerView profilesRecyclerView;

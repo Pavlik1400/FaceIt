@@ -19,10 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/**
- * This class is adapter for recyclerView in profiles menu
- */
-
 package com.faceit.faceitapp;
 
 import android.content.Context;
@@ -38,6 +34,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+/**
+ * This class is adapter for recyclerView in profiles menu
+ */
 public class ProfileItemAdapter extends RecyclerView.Adapter<ProfileItemAdapter.ProfileItemViewHolder> {
     // Init inflater, list for names and context
     LayoutInflater mInflater;

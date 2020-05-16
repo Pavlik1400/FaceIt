@@ -19,11 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/*
-This class is DataBase of users, that stores users and
-data about their face. UserDataBase extends from SQLiteOpenHelper
- */
-
 package com.faceit.faceitapp;
 
 import android.content.ContentValues;
@@ -41,6 +36,10 @@ import org.opencv.core.Mat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/*
+This class is DataBase of users, that stores users and
+data about their face. UserDataBase extends from SQLiteOpenHelper
+ */
 public class UsersDataBase extends SQLiteOpenHelper {
     // String that represents table and columns
     static final String TABLE_USERS = "users";

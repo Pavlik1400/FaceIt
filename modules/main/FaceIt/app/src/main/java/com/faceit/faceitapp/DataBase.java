@@ -19,11 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/**
- * This class is data base that contains -
- * 1) password, 2) information about profiles and blocked apps there
- */
-
 package com.faceit.faceitapp;
 
 import android.content.ContentValues;
@@ -42,6 +37,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+/**
+ * This class is data base that contains -
+ * 1) password, 2) information about profiles and blocked apps there
+ */
 public class DataBase extends SQLiteOpenHelper {
     // Strings that are used for creating and accessing table
     // with profiles and locked applications

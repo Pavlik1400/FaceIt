@@ -19,11 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-
-/**
- * This class is adapter for recyclerView that shows all installed apps
- */
-
 package com.faceit.faceitapp;
 
 import android.content.Context;
@@ -40,6 +35,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
+/**
+ * This class is adapter for recyclerView that shows all installed apps
+ */
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
 
     // init all containers that will be used, inflater for one holder and context

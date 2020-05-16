@@ -19,10 +19,6 @@
  email: pvysoft@gmail.com
 */
 
-/**
- * This class represents activity that can update/set/check password.
- * Its purpose is defined by extras put in the Intent that starts it
- */
 package com.faceit.faceitapp;
 
 import androidx.annotation.RequiresApi;
@@ -39,6 +35,10 @@ import android.widget.Toast;
 
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * This class represents activity that can update/set/check password.
+ * Its purpose is defined by extras put in the Intent that starts it
+ */
 public class PasswordActivity extends AppCompatActivity {
     // init all elements of activity (edit texts and button)
     private EditText oldPasswordEditText;
