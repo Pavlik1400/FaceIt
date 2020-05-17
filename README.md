@@ -86,6 +86,7 @@ For Windows:
 For Linux:
 
 `
+
 nano ~/.bash_profile
 
 export OPENCV_ANDROID_SDK=/path/to/OpenCV-android-sdk
@@ -99,6 +100,7 @@ echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 For MacOS:
 
 `
+
 nano /etc/launchd.conf
 
 setenv OPENCV_ANDROID_SDK /path/to/OpenCV-android-sdk
