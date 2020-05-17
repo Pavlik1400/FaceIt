@@ -141,7 +141,7 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
 
     /**
      * Method for checking whether service is currently running
-     * @param serviceClass
+     * @param serviceClass name of Java class to be checked
      * @return bool
      */
     private boolean isMyServiceRunning(Class<?> serviceClass) {

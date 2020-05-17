@@ -46,26 +46,38 @@ import java.util.TreeMap;
 
 import static com.faceit.faceitapp.Notification.CHANNEL_ID;
 
+/**
+ * Class that implements blocking service.
+ * This service monitor running apps and block
+ * those that supposed to be blocked
+ */
 public class BlockService extends Service {
-    private Timer timer; //timer for scheduling service work
+    private Timer timer;
     private boolean recognition_running = false;
     private String allowed_app = "None";
     private double time_from_last_open=-1;
 
-
+    /**
+     * Method for creating the service
+     */
     @Override
     public void onCreate() {
         super.onCreate();
     }
 
-
+    /**
+     * Method that starts service (can be called many times but I wouldn't do this)
+     * Creating notification that would allow run service in the foreground and therefore not to
+     * be killed by system
+     * @param intent intent is a simple message object that is used
+     *               to communicate between android components
+     * @param flags tell the system how to run the service
+     * @param startId number that identifies service for the system
+     * @return mode of running
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //*Method that starts service (can be called many times but I wouldn't do this)*/
-        /*Creating notification that would allow run service in the foreground and therefore not to
-         * be killed by system*/
-
-        // Intent to open the main activity when notification is pressed
+        /* Intent to open the main activity when notification is pressed */
         Intent notificationIntent = new Intent(this, FaceRecognitionAppActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
                 0, notificationIntent, 0);
@@ -79,12 +91,23 @@ public class BlockService extends Service {
         return START_STICKY; //means that after killing system would try to restart service again
     }
 
+    /**
+     * Method for handling destruction
+     * of the service
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();//kill service
         stopTimerTask();//kill timer
     }
 
+    /**
+     * Method for communication with other
+     * parts of the program
+     * @param intent is a simple message object that is used
+     *              to communicate between android components
+     * @return null
+     */
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -92,8 +115,11 @@ public class BlockService extends Service {
         return null;
     }
 
+    /**
+     * Method search for the last active app
+     * @return Returns package name of the last active service or process
+     */
     private String getActiveApps() {
-        //*Returns package name of the last active service or process*/
         String currentApp = "NULL";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             UsageStatsManager usm = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
@@ -116,9 +142,14 @@ public class BlockService extends Service {
         return currentApp;
     }
 
+    /**
+     * Method that organises monitoring active apps
+     * and calling for block activity
+     * Work of service is based on Timer that
+     * allows to control how often
+     * program updates info about current app running
+     */
     public void runService(){
-        //*Method for running service
-        // argument is a package name of app to be blocked*/
 
         timer = new Timer();
         // Get database
@@ -149,6 +180,11 @@ public class BlockService extends Service {
             };
         timer.schedule(timerTask, 0, 200);
     }
+
+    /**
+     * Method that properly kills
+     * the Timer
+     */
     public void stopTimerTask() {
         if (timer != null) {
             timer.cancel();

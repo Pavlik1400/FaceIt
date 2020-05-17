@@ -9,7 +9,7 @@
     android:padding="16dp"
     android:scrollbarThumbHorizontal="@color/colorPrimaryDark"
     android:scrollbars="horizontal"
-    android:theme="@style/AppTheme"
+    android:theme="@style/AppTheme.NoActionBar"
     tools:context=".FaceRecognitionAppActivity"
     >
 
