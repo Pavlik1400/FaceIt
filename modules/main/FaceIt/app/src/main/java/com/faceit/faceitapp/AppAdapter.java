@@ -26,8 +26,8 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -116,7 +116,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
         // Init all elements of holder
         TextView appNameTextView;
         ImageView appIconImageView;
-        CheckBox lockedCheckBox;
+        Switch lockedSwitch;
 
         /**
          * Constructor, just to assign elements of holder
@@ -128,7 +128,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
             // Assign those elements
             appNameTextView = itemView.findViewById(R.id.appNameTextView);
             appIconImageView = itemView.findViewById(R.id.appIconImageView);
-            lockedCheckBox = itemView.findViewById(R.id.lockedCheckBox);
+            lockedSwitch = itemView.findViewById(R.id.lockedCheckBox);
         }
 
         /**
@@ -142,13 +142,13 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
             // Set app name, package name and status
             appNameTextView.setText(appName);
             appIconImageView.setImageDrawable(icon);
-            lockedCheckBox.setChecked(locked);
+            lockedSwitch.setChecked(locked);
 
             // Set on click listener: update app status
-            lockedCheckBox.setOnClickListener(new View.OnClickListener() {
+            lockedSwitch.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (lockedCheckBox.isChecked())
+                    if (lockedSwitch.isChecked())
                         setLocked(true, packageName);
                     else
                         setLocked(false, packageName);

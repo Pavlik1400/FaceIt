@@ -58,6 +58,7 @@ public class BlockService extends Service {
         super.onCreate();
     }
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //*Method that starts service (can be called many times but I wouldn't do this)*/

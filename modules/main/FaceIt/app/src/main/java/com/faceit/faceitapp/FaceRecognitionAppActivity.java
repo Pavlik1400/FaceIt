@@ -22,6 +22,7 @@
 package com.faceit.faceitapp;
 
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +35,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.ToggleButton;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -72,6 +75,31 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
 
         // init progress bar
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
+
+        /* managing toggle button that controls service*/
+        final ToggleButton toggle = (ToggleButton) findViewById(R.id.service_switch);
+        final Drawable button_off = getResources().getDrawable(R.drawable.service_button_off);
+        final Drawable button_on = getResources().getDrawable(R.drawable.service_button_on);
+        // check whether BlockService is currently running
+        if (isMyServiceRunning(BlockService.class)){
+            toggle.setBackgroundDrawable(button_off);
+            toggle.setChecked(true);
+        }
+        else{
+            toggle.setBackgroundDrawable(button_on);
+            toggle.setChecked(false);
+        }
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    toggle.setBackgroundDrawable(button_off);
+                    startService();
+                } else {
+                    toggle.setBackgroundDrawable(button_on);
+                    stopService();
+                }
+            }
+        });
 
         // Show loading bar
         ShowHideProgressBar(1);
@@ -112,6 +140,21 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
     }
 
     /**
+     * Method for checking whether service is currently running
+     * @param serviceClass
+     * @return bool
+     */
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Binds button that shows all application
      * @param v - button View
      */
@@ -124,9 +167,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
 
     /**
      * Binds button with starting service
-     * @param v - button View
      */
-    public void startService(View v) {
+    public void startService() {
         Intent serviceIntent = new Intent(this, BlockService.class);
         ContextCompat.startForegroundService(this, serviceIntent); /*start foreground service
         which won`t be killed by system(less likely)*/
@@ -134,9 +176,8 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
 
     /**
      * Binds button with stopping service
-     * @param v - button View
      */
-    public void stopService(View v) {
+    public void stopService() {
         Intent serviceIntent = new Intent(this, BlockService.class);
         stopService(serviceIntent);
     }

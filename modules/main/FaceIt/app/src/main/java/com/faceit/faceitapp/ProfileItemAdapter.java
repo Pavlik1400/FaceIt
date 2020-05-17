@@ -32,6 +32,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 
 /**
@@ -94,7 +96,7 @@ public class ProfileItemAdapter extends RecyclerView.Adapter<ProfileItemAdapter.
         // Init elements of layout
         private TextView profileNameTextView;
         private CheckBox chooseProfileCheckBox;
-        private Button deleteButton;
+        private FloatingActionButton deleteButton;
 
 
         /**

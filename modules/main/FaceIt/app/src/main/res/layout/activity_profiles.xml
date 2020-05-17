@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfilesActivity">
+    android:background="@drawable/back_profiles"
+    tools:context=".ProfilesActivity"
+    >
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/profilesRecyclerView"
@@ -18,28 +20,35 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addProfileFloatingActionButton"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="63dp"
+        android:layout_height="57dp"
         android:clickable="true"
         android:focusable="true"
+        app:srcCompat="@android:drawable/ic_input_add"
+        android:tint="@android:color/white"
+        android:backgroundTint="#F9880FC8"
+
+        app:backgroundTintMode="src_atop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.909"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/profilesRecyclerView"
-        app:layout_constraintHorizontal_bias="0.95"
-        app:layout_constraintVertical_bias="0.975" />
+        app:layout_constraintVertical_bias="0.98" />
 
     <EditText
         android:id="@+id/profileNameEditText"
-        android:layout_width="270dp"
-        android:layout_height="70dp"
+        style="@style/PasswordEditText"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:background="@drawable/edit_text_back"
+        android:hint="Profile name"
         android:inputType="textPersonName"
-        android:hint="profile name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/addProfileFloatingActionButton"
+        app:layout_constraintHorizontal_bias="0.42"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.4"
-        app:layout_constraintVertical_bias="0.975" />
+        app:layout_constraintVertical_bias="0.98" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,43 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:theme="@style/AppTheme">
 
 
     <TextView
         android:id="@+id/appNameTextView"
+        style="@style/AppTheme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="130dp"
-        android:layout_marginLeft="130dp"
-        android:layout_marginTop="24dp"
-        android:textSize="16sp"
+        android:layout_marginLeft="110dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="100dp"
+
+        android:fontFamily="@font/main_font"
+        android:padding="10dp"
         android:text="App Name"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:theme="@style/AppTheme"
 
         />
 
 
     <ImageView
         android:id="@+id/appIconImageView"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+
         android:layout_marginStart="30dp"
-        android:layout_marginLeft="3dp"
-        android:layout_marginTop="24dp"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:layout_height="70dp"
-        android:layout_width="70dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:scrollbarDefaultDelayBeforeFade="400"
+        android:scrollbarFadeDuration="250"
+        android:scrollbarSize="4dp"
+        app:srcCompat="@mipmap/ic_launcher_round"
 
         />
 
-    <CheckBox
+<!--    <CheckBox-->
+<!--        android:id="@+id/lockedCheckBox"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="125dp"-->
+<!--        android:layout_marginLeft="125dp"-->
+<!--        android:layout_marginTop="70dp"-->
+<!--        android:text="Select"-->
+<!--        android:textSize="12sp"-->
+
+<!--        />-->
+
+    <Switch
         android:id="@+id/lockedCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="125dp"
-        android:layout_marginLeft="125dp"
-        android:layout_marginTop="70dp"
-        android:text="Select"
-        android:textSize="12sp"
-
-        />
+        android:layout_marginLeft="300dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:checked="true"
+        android:shadowColor="#FFFFFF"
+        android:switchMinWidth="60dp"
+        android:textColorHighlight="#FFFFFF"
+        android:textColorHint="#FFFFFF"
+        android:textColorLink="#FFFFFF"
+        android:textOff="OFF"
+        android:textOn="ON" />
 
 </FrameLayout>
