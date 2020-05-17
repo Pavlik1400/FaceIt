@@ -7,7 +7,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 6
-        versionName '1.1.1-beta'
+        versionName '1.2.1-beta'
         vectorDrawables.useSupportLibrary = true
         ndk {
             stl 'c++_static'
