@@ -184,6 +184,7 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                                 finish();
                             }
                             else {
+                                showToast("Invalid password", Toast.LENGTH_SHORT);
                                 scheduleRecognition();
                             }
                         }else {
@@ -228,6 +229,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                 return;
             }
 
+            if (mGray == null){
+                return;
+            }
             Log.i(TAG, "Gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
             if (mGray.total() == 0)
                 return;
@@ -399,6 +403,7 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         super.onPause();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+        finish();
     }
 
     /**

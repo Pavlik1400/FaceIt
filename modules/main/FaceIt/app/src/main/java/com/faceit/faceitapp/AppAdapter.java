@@ -148,10 +148,16 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.ItemViewHolder>{
             lockedSwitch.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (lockedSwitch.isChecked())
+                    if (lockedSwitch.isChecked()) {
+                        appsLocked.add(packageName);
                         setLocked(true, packageName);
-                    else
+                        notifyDataSetChanged();
+                    }
+                    else {
                         setLocked(false, packageName);
+                        appsLocked.remove(packageName);
+                        notifyDataSetChanged();
+                    }
                 }
             });
         }
