@@ -27,15 +27,21 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class is data base that contains -
@@ -53,6 +59,11 @@ public class DataBase extends SQLiteOpenHelper {
     // Strings that are used for creating and accessing table with password
     static final String TABLE_PASSWORD = "password_table";
     static final String COLUMN_PASSWORD = "password";
+
+    // String that represents table and columns
+    static final String TABLE_USERS = "users";
+    static final String COLUMN_IMAGES = "name";
+    static final String COLUMN_LABELS = "face_data";
 
     // Additional information about data base
     private static final int DATABASE_VERSION = 1;
@@ -72,6 +83,13 @@ public class DataBase extends SQLiteOpenHelper {
                     _ID + " TEXT," +
                     COLUMN_PASSWORD + " TEXT" + ")";
 
+    // Initializing String for table with users
+    private static final String SQL_CREATE_USERS =
+            "CREATE TABLE " + TABLE_USERS + " (" +
+                    _ID + " INTEGER PRIMARY KEY," +
+                    COLUMN_IMAGES + " TEXT," +
+                    COLUMN_LABELS + " TEXT" + ")";
+
     // String for deleting for table with profiles
     private static final String SQL_DELETE_PROFILES =
             "DROP TABLE IF EXISTS " + TABLE_PROFILES;
@@ -79,6 +97,10 @@ public class DataBase extends SQLiteOpenHelper {
     // String for deleting for table with password
     private static final String SQL_DELETE_PASSWORD =
             "DROP TABLE IF EXISTS " + TABLE_PASSWORD;
+
+    //  String for deleting for table with users
+    private static final String SQL_DELETE_USERS =
+            "DROP TABLE IF EXISTS " + TABLE_USERS;
 
     /**
      * Just default constructor
@@ -96,6 +118,7 @@ public class DataBase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_PROFILES);
         db.execSQL(SQL_CREATE_PASSWORD);
+        db.execSQL(SQL_CREATE_USERS);
     }
 
     /**
@@ -108,6 +131,7 @@ public class DataBase extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_PROFILES);
         db.execSQL(SQL_DELETE_PASSWORD);
+        db.execSQL(SQL_DELETE_USERS);
         onCreate(db);
     }
 
@@ -416,5 +440,143 @@ public class DataBase extends SQLiteOpenHelper {
         setterChosenProfile.put(DataBase.COLUMN_PROFILE_STATUS, "true");
         db.update(DataBase.TABLE_PROFILES, setterChosenProfile,
                 DataBase.COLUMN_PROFILE_NAME + " = ?", new String[] {profileName});
+    }
+
+    /**
+     * Puts Images in the database
+     * @param images - array list of matrixes that represent images
+     */
+    public void putImages(ArrayList<Mat> images){
+        // Access to DB
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Check input on 'nullness'
+        if (images == null)
+            return;
+
+        // Convert ArrayLists<Mat> to ArrayList<String>
+        ArrayList<String> arrayImages = new ArrayList<String>();
+        for (Mat image : images) {
+            int size = (int) (image.total() * image.channels());
+            byte[] data = new byte[size];
+            image.get(0, 0, data);
+            String dataString = new String(Base64.encode(data, Base64.DEFAULT));
+            arrayImages.add(dataString);
+        }
+
+        // Convert ArrayList<String> to String[]
+        String[] myStringList = arrayImages.toArray(new String[arrayImages.size()]);
+        // Convert String[] to just String
+        String resultString = TextUtils.join("‚‗‚", myStringList);
+
+        // put String images converted to String to value
+        ContentValues value = new ContentValues();
+        value.put(DataBase.COLUMN_IMAGES, resultString);
+
+        // Get Cursor pointing on the only row in DB
+        Cursor labelCursor = db.rawQuery("select * from " + DataBase.TABLE_USERS,null);
+
+        // if db is empty, than insert value. Default value of labels is ""
+        if (!labelCursor.moveToNext()){
+            value.put(DataBase.COLUMN_LABELS, "");
+            db.insert(DataBase.TABLE_USERS, null, value);
+        }
+        // else update value in DB
+        else{
+            String oldImage =  labelCursor.getString(labelCursor.getColumnIndex(DataBase.COLUMN_LABELS));
+            db.update(DataBase.TABLE_USERS, value,
+                    DataBase.COLUMN_IMAGES + " = ?", new String[] {oldImage});
+        }
+
+    }
+
+    /**
+     * Puts labels in the database. Labels connect photos to usernames
+     * @param labels - array of Strings
+     */
+    public void putLabels(ArrayList<String> labels){
+        // Access to database
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Convert ArrayList<String> to String[]
+        String[] myStringList = labels.toArray(new String[labels.size()]);
+        // Convert String[] to String
+        String resultString = TextUtils.join("‚‗‚", myStringList);
+        // Put converted to String labels in the value
+        ContentValues value = new ContentValues();
+        value.put(DataBase.COLUMN_LABELS, resultString);
+
+        // get cursor pointing at the only row
+        Cursor imagesCursor = db.rawQuery("select * from " + DataBase.TABLE_USERS,null);
+
+        // if db is empty - insert
+        if (!imagesCursor.moveToNext()){
+            value.put(DataBase.COLUMN_IMAGES, "");
+            db.insert(DataBase.TABLE_USERS, null, value);
+        }
+        // else update
+        else{
+            String oldLabel =  imagesCursor.getString(imagesCursor.getColumnIndex(DataBase.COLUMN_LABELS));
+            db.update(DataBase.TABLE_USERS, value,
+                    DataBase.COLUMN_LABELS + " = ?", new String[] {oldLabel});
+        }
+    }
+
+    /**
+     * Returns images stored in the database
+     * @return array list of matrxes, there each matrix represents image
+     */
+    public ArrayList<Mat> getImages(){
+        // Access to database
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ArrayList<Mat> result = new ArrayList<>();
+        String stringLabel;
+
+        // get cursor pointing at the only row
+        Cursor imageCursor = db.rawQuery("select * from " + DataBase.TABLE_USERS,null);
+        // if is is empty than default value is ""
+        if (!imageCursor.moveToNext())
+            stringLabel = "";
+            // else get value from db
+        else
+            stringLabel = imageCursor.getString(imageCursor.getColumnIndex(DataBase.COLUMN_IMAGES));
+        imageCursor.close();
+
+        // Convert String to ArrayList <String>
+        ArrayList<String> arrayImages = new ArrayList<String>(Arrays.asList(TextUtils.split(stringLabel, "‚‗‚")));
+
+        // Convert Array:ist<String> to ArrayList<Mat>
+        for (String image : arrayImages) {
+            byte[] data = Base64.decode(image, Base64.DEFAULT);
+            Mat mat = new Mat(data.length, 1, CvType.CV_8U);
+            mat.put(0, 0, data);
+            result.add(mat);
+        }
+        return result;
+    }
+
+    /**
+     * Returns labels stored in the database
+     * @return array of Strings, where each string is label
+     */
+    public ArrayList<String> getLabels(){
+        // Access data base
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String stringLabels;
+
+        // // get cursor pointing at the only row
+        Cursor labelCursor = db.rawQuery("select * from " + DataBase.TABLE_USERS, null);
+        // if empty - return default value - ""
+        if (!labelCursor.moveToNext())
+            stringLabels = "";
+            // Else get value from db
+        else
+            stringLabels = labelCursor.getString(labelCursor.getColumnIndex(DataBase.COLUMN_LABELS));
+        labelCursor.close();
+
+        // return value converted to ArrayList<String>
+        return new ArrayList<String>(Arrays.asList(TextUtils.split(stringLabels, "‚‗‚")));
     }
 }

@@ -88,7 +88,8 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
     private float faceThreshold, distanceThreshold;
     private int maximumImages;
     private SharedPreferences prefs;
-    private UsersDataBase usersDB;
+    //private UsersDataBase usersDB;
+    private  DataBase db;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private final int delay_photo_take = 500;
@@ -173,9 +174,9 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                         if (!password.isEmpty()) { // Make sure the input is valid
                             // If input is valid, dismiss the dialog and start password in database check
                             dialog.dismiss();
-                            DataBase db = new DataBase(getApplicationContext());
+                            DataBase db_ = new DataBase(getApplicationContext());
                             try {
-                                flag_password_correct = db.checkPassword(password);
+                                flag_password_correct = db_.checkPassword(password);
                             } catch (NoSuchAlgorithmException e) {
                                 e.printStackTrace();
                             }
@@ -295,7 +296,8 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         // Set radio button based on value stored in shared preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        usersDB = new UsersDataBase(getApplicationContext());
+        //usersDB = new UsersDataBase(getApplicationContext());
+        db = new DataBase(getApplicationContext());
         faceThreshold = (float) 0.05; // Get initial value
         distanceThreshold = (float) 0.05; // Get initial value
         maximumImages = 50; // Get initial value
@@ -449,8 +451,10 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
                     mOpenCvCameraView.enableView();
 
                     // Read images and labels from shared preferences
-                    images = usersDB.getImages();
-                    imagesLabels = usersDB.getLabels();
+//                    images = usersDB.getImages();
+//                    imagesLabels = usersDB.getLabels();
+                    images = db.getImages();
+                    imagesLabels = db.getLabels();
 
                     Log.i(TAG, "Number of images: " + images.size()  + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {

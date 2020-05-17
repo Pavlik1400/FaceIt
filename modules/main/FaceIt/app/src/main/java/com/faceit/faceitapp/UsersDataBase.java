@@ -19,6 +19,9 @@
  email: pvysoft@gmail.com
 */
 
+/*
+ * Code inspired (by Lauszus, GNU GPL v2.0 License): https://github.com/Lauszus/FaceRecognitionApp
+ * */
 package com.faceit.faceitapp;
 
 import android.content.ContentValues;

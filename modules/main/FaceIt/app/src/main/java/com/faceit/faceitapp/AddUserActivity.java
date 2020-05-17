@@ -91,7 +91,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private boolean useEigenfaces = true;
     private float faceThreshold, distanceThreshold;
     private SharedPreferences prefs;
-    private UsersDataBase usersDB;
+    //private UsersDataBase usersDB;
+    private DataBase db;
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private int unique_photo_num_left = 0;
@@ -282,7 +283,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        usersDB = new UsersDataBase(getApplicationContext()); // Used to store ArrayLists in the shared preferences
+        //usersDB = new UsersDataBase(getApplicationContext()); // Used to store ArrayLists in the shared preferences
+        db = new DataBase(getApplicationContext());
 
         // Limit constants
         faceThreshold = (float) 0.05; // Used for differentiating faces with each other
@@ -397,8 +399,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                             showToast("User added: " + imagesLabels.get(minIndex), Toast.LENGTH_SHORT);
                             addLabel(imagesLabels.get(minIndex));
                             trainFaces();
-                            usersDB.putImages(images);
-                            usersDB.putLabels(imagesLabels);
+//                            usersDB.putImages(images);
+//                            usersDB.putLabels(imagesLabels);
+                            db.putImages(images);
+                            db.putLabels(imagesLabels);
                             finish();
                         }else {
                             showToast("Please, more more photos from different edge", Toast.LENGTH_SHORT);
@@ -469,8 +473,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
 
         // Store ArrayLists containing the images and labels
         if (images != null && imagesLabels != null) {
-            usersDB.putImages(images);
-            usersDB.putLabels(imagesLabels);
+//            usersDB.putImages(images);
+//            usersDB.putLabels(imagesLabels);
+            db.putImages(images);
+            db.putLabels(imagesLabels);
         }
     }
 
@@ -501,8 +507,10 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                     mOpenCvCameraView.enableView();
 
                     // Read images and labels from shared preferences
-                    images = usersDB.getImages();
-                    imagesLabels = usersDB.getLabels();
+//                    images = usersDB.getImages();
+//                    imagesLabels = usersDB.getLabels();
+                    images = db.getImages();
+                    imagesLabels = db.getLabels();
 
                     Log.i(TAG, "Number of images: " + images.size()  + ". Number of labels: " + imagesLabels.size());
                     if (!images.isEmpty()) {
