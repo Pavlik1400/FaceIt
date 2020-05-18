@@ -29,6 +29,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -635,10 +636,14 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+        startMainActivity.putExtra("start", "passwordChecked");
+        startActivity(startMainActivity);
+
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        else
-            super.onBackPressed();
+        finish();
     }
 
     /**

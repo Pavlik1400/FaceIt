@@ -40,7 +40,7 @@
         <activity
             android:name=".FaceRecognitionAppActivity"
             android:label="FaceIt"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:excludeFromRecents="true">
             <intent-filter>
@@ -51,10 +51,12 @@
         </activity>
         <activity
             android:name=".AddUserActivity"
+            android:screenOrientation="portrait"
             android:label="FaceIt" />
         <activity
             android:name=".UserLockRecognitionActivity"
             android:label="FaceIt"
+            android:screenOrientation="portrait"
             android:excludeFromRecents="true"/>
         <activity android:name=".ListOfAppsActivity" />
 
