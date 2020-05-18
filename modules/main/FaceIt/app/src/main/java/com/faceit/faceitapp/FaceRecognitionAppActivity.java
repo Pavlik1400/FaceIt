@@ -37,6 +37,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.ToggleButton;
 
 import androidx.annotation.RequiresApi;

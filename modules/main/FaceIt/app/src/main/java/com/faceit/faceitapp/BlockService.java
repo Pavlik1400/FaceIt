@@ -32,12 +32,15 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.Timer;
@@ -53,9 +56,7 @@ import static com.faceit.faceitapp.Notification.CHANNEL_ID;
  */
 public class BlockService extends Service {
     private Timer timer;
-    private boolean recognition_running = false;
     private String allowed_app = "None";
-    private double time_from_last_open=-1;
 
     /**
      * Method for creating the service
@@ -159,18 +160,13 @@ public class BlockService extends Service {
             public void run() {
                 String current_app_package = getActiveApps();
                 // if locked do activity
-                if (!current_app_package.equals("NULL") && !current_app_package.equals("android")) {
-                    if (db.isLocked(db.getChosenProfile(), current_app_package) && !recognition_running && allowed_app.equals("None")) {
+                if (!current_app_package.equals("NULL") && !current_app_package.equals("android") && !current_app_package.equals("com.faceit.faceitapp")) {
+                    if (db.isLocked(db.getChosenProfile(), current_app_package) && allowed_app.equals("None")) {
                         allowed_app = current_app_package;
-                        recognition_running = true;
                         Intent dialogIntent = new Intent(BlockService.this, UserLockRecognitionActivity.class);
                         dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(dialogIntent);
-                    } else if (current_app_package.equals(allowed_app) && recognition_running) {
-                        time_from_last_open = System.currentTimeMillis();
-                        recognition_running = false;
-                    } else if (!current_app_package.equals(allowed_app) &&
-                            !recognition_running && (System.currentTimeMillis() - time_from_last_open > 500)) {
+                    } else if (!current_app_package.equals(allowed_app)) {
                         allowed_app = "None";
                     }
                 }
