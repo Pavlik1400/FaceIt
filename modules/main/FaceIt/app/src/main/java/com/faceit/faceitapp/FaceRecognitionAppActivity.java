@@ -129,15 +129,24 @@ public class FaceRecognitionAppActivity extends AppCompatActivity {
         }
         // Else check password
         else{
-            Intent checkPasswordIntent = new Intent(getApplicationContext(), PasswordActivity.class);
-            checkPasswordIntent.putExtra("mode", "check");
-            startActivity(checkPasswordIntent);
+            Intent inIntent = getIntent();
+            if (inIntent.getStringExtra("start") == null) {
+                Intent checkPasswordIntent = new Intent(getApplicationContext(), PasswordActivity.class);
+                checkPasswordIntent.putExtra("mode", "check");
+                startActivity(checkPasswordIntent);
+            }
         }
 
         // hide loading bar
         ShowHideProgressBar(0);
 
         db.close();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        finish();
     }
 
     /**

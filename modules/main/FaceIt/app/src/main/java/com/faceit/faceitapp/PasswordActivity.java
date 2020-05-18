@@ -98,6 +98,9 @@ public class PasswordActivity extends AppCompatActivity {
                                         "Password updated successfully!",
                                         Toast.LENGTH_SHORT).show();
                                 finish();
+                                Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+                                startMainActivity.putExtra("start", "passwordChecked");
+                                startActivity(startMainActivity);
                             }
                         } catch (NoSuchAlgorithmException e) {
                             e.printStackTrace();
@@ -155,6 +158,9 @@ public class PasswordActivity extends AppCompatActivity {
                                         Toast.LENGTH_SHORT).show();
                             } else {
                                 finish();
+                                Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+                                startMainActivity.putExtra("start", "passwordChecked");
+                                startActivity(startMainActivity);
                             }
                         } catch (NoSuchAlgorithmException e) {
                             e.printStackTrace();
@@ -175,8 +181,12 @@ public class PasswordActivity extends AppCompatActivity {
         // if mode is set password or check password, user can't exit
         Intent inIntent = getIntent();
         String mode = inIntent.getStringExtra("mode");
-        if (mode.equals("update"))
-            super.onBackPressed();
+        if (mode.equals("update")) {
+            Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+            startMainActivity.putExtra("start", "passwordChecked");
+            startActivity(startMainActivity);
+            finish();
+        }
         else if (mode.equals("set")){
             Toast.makeText(getApplicationContext(), "Please, set password",
                     Toast.LENGTH_SHORT).show();

@@ -97,4 +97,12 @@ public class ListOfAppsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed(){
+        Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+        startMainActivity.putExtra("start", "passwordChecked");
+        startActivity(startMainActivity);
+        finish();
+    }
+
 }

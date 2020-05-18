@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -91,4 +92,13 @@ public class ProfilesActivity extends AppCompatActivity {
         db.close();
 
     }
+    @Override
+    public void onBackPressed(){
+        Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+        startMainActivity.putExtra("start", "passwordChecked");
+        startActivity(startMainActivity);
+        finish();
+    }
 }
+
+
