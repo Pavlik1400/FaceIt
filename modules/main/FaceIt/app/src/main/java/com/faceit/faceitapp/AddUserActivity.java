@@ -96,6 +96,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private Toolbar mToolbar;
     private NativeMethods.TrainFacesTask mTrainFacesTask;
     private int unique_photo_num_left = 0;
+    private boolean flag_activity_active = true;
+    //private TinyDB userdDB;
 
     /**
      * Show small messages to user
@@ -287,8 +289,8 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
         db = new DataBase(getApplicationContext());
 
         // Limit constants
-        faceThreshold = (float) 0.05; // Used for differentiating faces with each other
-        distanceThreshold = (float) 0.05; // Used for checking face distances
+        faceThreshold = (float) 0.07; // Used for differentiating faces with each other
+        distanceThreshold = (float) 0.07; // Used for checking face distances
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
             NativeMethods.MeasureDistTask mMeasureDistTask;
@@ -316,7 +318,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 // Scale image in order to decrease computation time and make the image square,
                 // so it does not crash on phones with different aspect ratios for the front
                 // and back camera
-                Size imageSize = new Size(700, 700);
+                Size imageSize = new Size(400, 400);
                 Imgproc.resize(mGray, mGray, imageSize);
                 Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
 
@@ -343,8 +345,6 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 // Calculate normalized Euclidean distance
                 mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
                 mMeasureDistTask.execute(image);
-
-                showLabelsDialog();
             }
         });
 
@@ -403,6 +403,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
 //                            usersDB.putLabels(imagesLabels);
                             db.putImages(images);
                             db.putLabels(imagesLabels);
+                            flag_activity_active = false;
                             finish();
                         }else {
                             showToast("Please, more more photos from different edge", Toast.LENGTH_SHORT);
@@ -412,19 +413,24 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                     else if (faceDist < faceThreshold) { // 2. Near face space but not near a known face class
                         showToast("Face added, please, continue", Toast.LENGTH_SHORT);
                         unique_photo_num_left = unique_photo_num_left - 1;
+                        showLabelsDialog();
                     }
                     else if (minDist < distanceThreshold) { // 3. Distant from face space and near a face class
                         showToast("Face added, please, continue", Toast.LENGTH_SHORT);
                         unique_photo_num_left = unique_photo_num_left - 1;
+                        showLabelsDialog();
                     }
                     else { // 4. Distant from face space and not near a known face class.
                         showToast("Take more photos!!", Toast.LENGTH_SHORT);
+                        showLabelsDialog();
                     }
                 }
             } else {
                 Log.w(TAG, "Array is null");
-                if (uniqueLabels == null || uniqueLabels.length > 1)
+                if (uniqueLabels == null || uniqueLabels.length > 1) {
                     showToast("Please, make some more photos", Toast.LENGTH_SHORT);
+                    showLabelsDialog();
+                }
             }
         }
     };

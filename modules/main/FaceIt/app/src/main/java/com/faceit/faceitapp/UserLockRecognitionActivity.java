@@ -240,24 +240,21 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
             // Scale image in order to decrease computation time and make the image square,
             // so it does not crash on phones with different aspect ratios for the front
             // and back camera
-            Size imageSize = new Size(700, 700);
+            Size imageSize = new Size(400, 400);
             Imgproc.resize(mGray, mGray, imageSize);
             Log.i(TAG, "Small gray height: " + mGray.height() + " Width: " + mGray.width() + " total: " + mGray.total());
 
+            if (mGray.height() != 400){
+                return;
+            }
+            if (mGray.width() != 400){
+                return;
+            }
+            if (mGray.total() != 160000){
+                return;
+            }
             Mat image = mGray.reshape(0, (int) mGray.total()); // Create column vector
             Log.i(TAG, "Vector height: " + image.height() + " Width: " + image.width() + " total: " + image.total());
-
-            if (!images.isEmpty()){
-                if (image.height() != images.get(0).height()){
-                    return;
-                }
-                if (image.width() != images.get(0).width()){
-                    return;
-                }
-                if (image.total() != images.get(0).total()){
-                    return;
-                }
-            }
 
             // Calculate normalized Euclidean distance
             mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
@@ -298,8 +295,8 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
 
         //usersDB = new UsersDataBase(getApplicationContext());
         db = new DataBase(getApplicationContext());
-        faceThreshold = (float) 0.05; // Get initial value
-        distanceThreshold = (float) 0.05; // Get initial value
+        faceThreshold = (float) 0.067; // Get initial value
+        distanceThreshold = (float) 0.067; // Get initial value
         maximumImages = 50; // Get initial value
 
         findViewById(R.id.take_picture_button).setOnClickListener(new View.OnClickListener() {
@@ -492,6 +489,7 @@ public class UserLockRecognitionActivity extends AppCompatActivity implements Ca
         super.onDestroy();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+        handler.removeCallbacksAndMessages(null);
     }
 
     /**
