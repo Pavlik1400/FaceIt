@@ -406,6 +406,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                             db.putLabels(imagesLabels);
                             flag_activity_active = false;
                             finish();
+                            Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+                            startMainActivity.putExtra("start", "passwordChecked");
+                            startActivity(startMainActivity);
                         }else {
                             showToast("Please, more more photos from different edge", Toast.LENGTH_SHORT);
                             images.remove(images.size() - 1);
@@ -449,6 +452,9 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
                 } else {
                     showToast("Permission required!", Toast.LENGTH_LONG);
                     finish();
+                    Intent startMainActivity = new Intent(getApplicationContext(), FaceRecognitionAppActivity.class);
+                    startMainActivity.putExtra("start", "passwordChecked");
+                    startActivity(startMainActivity);
                 }
         }
     }
