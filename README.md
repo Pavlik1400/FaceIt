@@ -59,7 +59,7 @@ Finally, the main UI class:
 - `FaceRecognitionActivity.java` - main UI Activity, which works as a menu and which starts `AddUserActivity`, `DetailsActivity`, and `BlockServise`. Here user can navigate through all features of our app
 
 ## Project status
-The project is on the way to the pre-release version. Just finishing some technical bugs. Version: 1.1.1-beta
+The project is on the way to the pre-release version. Just finishing some technical bugs. Version: 1.2.5-beta
 
 Now we are in process of hosting our app on getjar.com
 
@@ -152,3 +152,17 @@ echo $OPENCV_ANDROID_SDK $EIGEN3_DIR
 ### v1.1.1 - beta
 - fully updated UI
 - small bugs fix
+
+### v1.1.2 - beta
+- small bugs in recognition and recyclerViev fix
+
+### v1.2.1 - beta
+- Merged two databases
+
+### v1.2.2 - 1.2.4 - beta
+- Fixed small bugs in recognition activity, password activity and database
+- Added generated documentation
+
+### v1.2.5 - beta
+- Added video
+- Updated apk
