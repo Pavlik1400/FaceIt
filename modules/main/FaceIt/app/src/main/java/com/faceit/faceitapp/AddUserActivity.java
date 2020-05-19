@@ -91,6 +91,7 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
     private Toast mToast;
     private boolean useEigenfaces = true;
     private float faceThreshold, distanceThreshold;
+    private int maximumImages = 30;
     private SharedPreferences prefs;
     //private UsersDataBase usersDB;
     private DataBase db;
@@ -342,6 +343,11 @@ public class AddUserActivity extends AppCompatActivity implements CameraBridgeVi
 
                 images.add(image); // Add current image to the array
 
+                if (images.size() > maximumImages) {
+                    images.remove(0); // Remove first image
+                    imagesLabels.remove(0); // Remove first label
+                    Log.i(TAG, "The number of images is limited to: " + images.size());
+                }
 
                 // Calculate normalized Euclidean distance
                 mMeasureDistTask = new NativeMethods.MeasureDistTask(useEigenfaces, measureDistTaskCallback);
